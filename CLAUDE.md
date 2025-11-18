@@ -1,58 +1,87 @@
 # Claude Code Development Context
 
 ## Project Overview
-Web-based front end for running, visualizing, and interacting with examples from the official Temporal.io Cookbook - {{BRIEF_TECHNICAL_SUMMARY}}.
+Interactive web-based playground for exploring Temporal.io Cookbook examples. Built with Phoenix LiveView for real-time workflow visualization, enabling developers to learn Temporal patterns through hands-on experimentation without writing code.
+
+**Original PRD**: `/Users/joeszodfridt/src/brand/project-ideas/PRD_Temporal_Cookbook_UI.md`
 
 ## Project Requirements & Specification
-**PRD Location**: `docs/temporal-cookbook-ui-prd.md`
-**Status**: {{PRD_STATUS}} <!-- Draft/Complete/Needs Update -->
+**PRD Location**: `docs/PRD.md`
+**Status**: Complete - Ready for MVP Development
 
 ### Quick Reference
-- **Problem Statement**: {{PROBLEM_SUMMARY}}
-- **Target Users**: {{PRIMARY_USER_DESCRIPTION}}
-- **Core Value Proposition**: {{VALUE_PROPOSITION}}
-- **Success Metrics**: {{KEY_SUCCESS_METRICS}}
+- **Problem Statement**: Developers learning Temporal face barriers - documentation requires code writing and complex environment setup. No interactive way to explore workflow patterns visually.
+- **Target Users**: Backend/distributed systems developers evaluating Temporal, learning orchestration patterns, or onboarding to Temporal-based systems
+- **Core Value Proposition**: Transform Temporal learning from static docs to interactive visual exploration. See workflows execute in real-time, inject failures, send signals - all through intuitive UI.
+- **Success Metrics**: 8-10 patterns implemented | 95%+ workflow launch success | Real-time visualization < 1s | Both Python & Go workers operational
 
 ### PRD Development Process
-<!-- Track PRD creation and updates -->
-- {{DATE}}: {{PRD_MILESTONE}} ({{STATUS}})
-- {{DATE}}: {{PRD_MILESTONE}} ({{STATUS}})
+- 2025-11-15: Initial PRD populated from original project idea (Complete)
+- 2025-11-15: Project initialized with claude-code-workflow-template (Complete)
 
-**Next PRD Review**: {{NEXT_PRD_REVIEW_DATE}}
+**Next PRD Review**: End of Stage 0 (Planning & Requirements)
 
 ## Current Development Plan
 **Plan Location**: `docs/PLAN.md`
-**Sprint Goal**: {{SPRINT_GOAL}}
-**Active Features**: See PLAN.md for full list
+**Current Phase**: Stage 0 - Planning & Requirements (Pre-Development)
+**Active Features**: Technology stack research, development environment setup, architecture design
 
 ## Current Session Focus
-**Session**: {{SESSION_DESCRIPTION}}
-**Date**: {{SESSION_DATE}}
-**Current Issue**: [#{{ISSUE_NUMBER}} - {{ISSUE_TITLE}}]({{ISSUE_URL}}) {{STATUS_EMOJI}}
-**Branch**: `{{BRANCH_NAME}}`
-**Previous Success**:
-{{LIST_RECENT_ACCOMPLISHMENTS}}
+**Session**: Initial Project Setup
+**Date**: 2025-11-15
+**Current Phase**: Stage 0 - Planning & Requirements
+**Branch**: `main`
 
-**Current Goals**:
-{{LIST_SESSION_GOALS}}
+**Session Accomplishments**:
+- ✅ Project initialized from claude-code-workflow-template
+- ✅ GitHub repository created (private): https://github.com/jszod/temporal-cookbook-ui
+- ✅ PRD populated with comprehensive requirements from original idea
+- ✅ CLAUDE.md updated with project-specific context
 
-**Status**: {{SESSION_STATUS}}
-**Next Session**: {{NEXT_SESSION_FOCUS}}
+**Session Accomplishments** (2025-11-18):
+- ✅ **Project Focus Pivot**: Changed from general Temporal Cookbook to **Temporal AI Cookbook** (LiteLLM, multi-provider LLM support)
+- ✅ **High-Level Feature Plan**: Created `docs/PLAN.md` with 7 MVP features (vertical slice approach)
+- ✅ **PRD Updated**: Pivoted to AI Cookbook focus with multi-provider LLM support (OpenAI, Anthropic, Groq, Ollama)
+- ✅ **Feature 1 PRD Created**: `docs/features/feature-001-ui-mockup.md` with detailed wireframes (ASCII sketches)
+- ✅ **GitHub Milestone Created**: "MVP Features" milestone with 6-8 week timeline
+- ✅ **GitHub Issues Created**: Issues #1-#7 for all MVP features
+- ✅ **Workflow Established**: Feature-based approach (issues → PRDs in `/docs/features/` → tasks in `/docs/tasks/`)
+
+**Next Session Goals**:
+- Start Feature 1: Create wireframe sketches (digital or paper)
+- Initialize Phoenix LiveView project (`mix phx.new temporal_cookbook_ui --live --no-ecto`)
+- Configure Tailwind CSS and basic routing
+- Set up base layout with navigation header
+- Mark Issue #1 in progress and create task checklist
 
 ## Development Environment
-<!-- Customize these commands for your technology stack -->
-- **Install Dependencies**: `{{PACKAGE_MANAGER_INSTALL}}`
-- **Run Tests**: `{{PACKAGE_MANAGER_TEST}}`
-- **Format Code**: `{{PACKAGE_MANAGER_FORMAT}}`
-- **Lint Code**: `{{PACKAGE_MANAGER_LINT}}`
-- **Type Check**: `{{PACKAGE_MANAGER_TYPECHECK}}`
-- **Run CLI/Application**: `{{PACKAGE_MANAGER_RUN}}`
-- **{{PROJECT_AUTH_COMMAND}}**: `{{AUTH_DESCRIPTION}}`
-<!-- Add any additional development commands -->
-{{ADDITIONAL_DEV_COMMANDS}}
+
+### Tech Stack
+- **Frontend**: Elixir + Phoenix LiveView, Mermaid.js, Tailwind CSS
+- **Backend Workers**: Go workers (Temporal SDK), Python workers (Temporal SDK)
+- **Infrastructure**: Temporal Dev Server, Phoenix Server
+
+### Development Commands (to be configured)
+- **Install Elixir Dependencies**: `mix deps.get`
+- **Run Phoenix Server**: `mix phx.server`
+- **Run Tests**: `mix test`
+- **Format Code**: `mix format`
+- **Start Temporal Dev Server**: `temporal server start-dev`
+- **Run Go Workers**: TBD (to be determined during setup)
+- **Run Python Workers**: TBD (to be determined during setup)
 
 ### Code Quality Configuration
-**For Python projects with black formatter:**
+
+**Elixir (mix format):**
+- Elixir has built-in formatter via `mix format`
+- Configuration in `.formatter.exs`
+- Standard line length: 98 characters
+
+**Go (gofmt):**
+- Go has built-in formatter via `gofmt` or `go fmt`
+- Standard Go formatting conventions
+
+**Python (black):**
 ```ini
 # .flake8
 [flake8]
@@ -60,20 +89,16 @@ max-line-length = 88
 extend-ignore = E203, W503
 ```
 
-**For other languages:**
-<!-- Configure your linter to align with your formatter -->
-{{LANGUAGE_SPECIFIC_LINT_CONFIG}}
-
 **Code Quality Standards:**
 - All lint checks must pass before committing
-- Align linter line length with formatter settings
+- Run `mix format` for Elixir, `go fmt` for Go, `black` for Python
 - Focus on actionable code quality issues, not formatting noise
 
 ## Architecture Decisions Made
 **ADR Location**: `docs/decisions/`
 **Current Decisions**:
-- [ADR-001: {{FIRST_DECISION_TITLE}}](docs/decisions/001-{{FIRST_DECISION_FILE}}.md) - {{STATUS}}
-- [ADR-002: {{SECOND_DECISION_TITLE}}](docs/decisions/002-{{SECOND_DECISION_FILE}}.md) - {{STATUS}}
+- No ADRs yet - to be created during Stage 0 (Planning & Requirements)
+- Key decisions needed: Temporal Elixir client approach, worker supervision strategy, visualization framework
 
 ### ADR Guidelines
 - Create ADR for major architectural decisions before implementation
@@ -294,33 +319,41 @@ This template includes proven patterns for effective human-AI collaboration disc
 ## Learning Goals & Progress Tracking
 
 ### Technical Learning Objectives
-- **{{TECH_LEARNING_AREA}}**: {{LEARNING_GOAL_DESCRIPTION}}
-  - Progress: {{PROGRESS_STATUS}} ({{PROGRESS_PERCENTAGE}}%)
-  - Evidence: {{EVIDENCE_OF_LEARNING}}
-  - Next Milestone: {{NEXT_LEARNING_MILESTONE}}
 
-- **{{TECH_LEARNING_AREA}}**: {{LEARNING_GOAL_DESCRIPTION}}
-  - Progress: {{PROGRESS_STATUS}} ({{PROGRESS_PERCENTAGE}}%)
-  - Evidence: {{EVIDENCE_OF_LEARNING}}
-  - Next Milestone: {{NEXT_LEARNING_MILESTONE}}
+#### Phoenix LiveView Mastery
+- **Real-time State Management**: Master LiveView lifecycle, handle_event, handle_info patterns
+  - Progress: Not Started (0%)
+  - Success Criteria: Implement bidirectional real-time updates for workflow state without manual WebSocket code
+  - Timeline: Week 1-2 of MVP development
+  - Application: Real-time workflow visualization and event streaming
 
-### Project Learning Objectives
-- **{{PROJECT_LEARNING_AREA}}**: {{LEARNING_GOAL_DESCRIPTION}}
-  - Progress: {{PROGRESS_STATUS}} ({{PROGRESS_PERCENTAGE}}%)
-  - Evidence: {{EVIDENCE_OF_LEARNING}}
-  - Next Milestone: {{NEXT_LEARNING_MILESTONE}}
+- **Component Architecture**: Build reusable LiveView components for workflow UI elements
+  - Progress: Not Started (0%)
+  - Success Criteria: Create 5+ reusable LiveComponents (PatternCard, EventTimeline, WorkflowControls, etc.)
+  - Timeline: Throughout MVP phase
+  - Application: Consistent UI across all workflow patterns
+
+#### Temporal Multi-Language Integration
+- **SDK Client Integration**: Integrate Temporal gRPC client from Elixir, orchestrate workflows from Phoenix
+  - Progress: Not Started (0%)
+  - Success Criteria: Successfully start workflows, send signals, and query state from Phoenix backend
+  - Timeline: Week 1-2 of MVP development
+  - Application: All workflow control operations
+
+- **Worker Process Management**: Supervise and manage Go and Python worker processes from Elixir
+  - Progress: Not Started (0%)
+  - Success Criteria: Workers auto-restart on failure, health checks confirm worker availability
+  - Timeline: Week 2-3 of MVP development
+  - Application: Reliable worker execution for all cookbook examples
 
 ### Learning Milestone Review
-**Last Review**: {{LAST_REVIEW_DATE}}
-**Next Review**: {{NEXT_REVIEW_DATE}}
-
-#### Completed Milestones
-- {{COMPLETED_MILESTONE}} ({{COMPLETION_DATE}})
-- {{COMPLETED_MILESTONE}} ({{COMPLETION_DATE}})
+**Last Review**: 2025-11-15 (Project initialization)
+**Next Review**: End of Stage 0 (Planning & Requirements)
 
 #### Upcoming Milestones
-- {{UPCOMING_MILESTONE}} (Target: {{TARGET_DATE}})
-- {{UPCOMING_MILESTONE}} (Target: {{TARGET_DATE}})
+- Technology stack validation and selection (Target: Week 1)
+- First Phoenix LiveView + Temporal integration spike (Target: Week 2)
+- First workflow pattern working end-to-end (Target: Week 3)
 
 ## Claude Code Workflow Notes
 - **Session Start**: Follow Session Start Protocol above
@@ -560,3 +593,29 @@ After PR is merged:
 3. **Update milestone progress** if applicable
 4. **Clean up local branch**: `git branch -d {{BRANCH_PREFIX}}/X-description`
 5. **Update project board** by moving issue to "Done" column
+
+## Elixir OTP Expert Knowledge Base
+
+For OTP patterns, GenServer design, supervision, and architecture questions:
+
+**Quick Access**:
+- **Index**: `/Users/joeszodfridt/src/ai/apps/elixir-expert-mcp/knowledge/INDEX.md`
+- **Cheat Sheet**: `/Users/joeszodfridt/src/ai/apps/elixir-expert-mcp/knowledge/quick-reference/cheat-sheet.md`
+
+**Topics Available**:
+- [Layered Architecture](knowledge/otp-patterns/00-layered-architecture.md) - "Do Fun Things with Big, Loud Worker-Bees" pattern
+- [Data & Types](knowledge/otp-patterns/01-data-and-types.md) - Data structures, access patterns, immutability
+- [Functional Core](knowledge/otp-patterns/02-functional-core.md) - Pure functions, composition, testing
+- [Boundaries & GenServer](knowledge/otp-patterns/03-boundaries-genserver.md) - Process isolation, API design
+- [Lifecycle & Supervision](knowledge/otp-patterns/04-lifecycle-supervision.md) - Supervisors, fault tolerance
+- [Workers & Tasks](knowledge/otp-patterns/05-workers-and-tasks.md) - Concurrency primitives
+- [Integration](knowledge/otp-patterns/06-integration.md) - Component assembly, boundary testing
+
+**How It Works**:
+When you ask OTP/Elixir architecture questions, Claude will automatically reference these files, providing expert guidance based on Bruce Tate's "Designing Elixir Systems with OTP".
+
+**Token Efficiency**:
+- Quick questions (INDEX only): ~2-3K tokens
+- Detailed questions (1-2 topic files): ~5-10K tokens
+- Complex questions (multiple topics): ~15-25K tokens
+- vs reading full book: 200K+ tokens (10-40x improvement)
