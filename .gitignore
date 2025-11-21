@@ -1,3 +1,25 @@
+# Elixir/Phoenix - Mix build artifacts
+/_build/
+/deps/
+/doc/
+/.fetch
+*.ez
+erl_crash.dump
+
+# Elixir/Phoenix - Testing and coverage
+/cover/
+
+# Elixir/Phoenix - Package tarball
+temporal-cookbook-ui-*.tar
+
+# Elixir/Phoenix - Assets and static files
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# Node.js/Assets
+npm-debug.log
+/assets/node_modules/
+
 # Dependencies
 node_modules/
 venv/
@@ -38,3 +60,4 @@ coverage/
 # Temporary files
 *.tmp
 .cache/
+/tmp/

@@ -27,10 +27,11 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 **Active Features**: Technology stack research, development environment setup, architecture design
 
 ## Current Session Focus
-**Session**: Initial Project Setup
-**Date**: 2025-11-15
-**Current Phase**: Stage 0 - Planning & Requirements
+**Session**: Phoenix Setup & Configuration
+**Date**: 2025-11-21
+**Current Phase**: Stage 0 - Planning & Requirements → MVP Development (Transition)
 **Branch**: `main`
+**Active Feature**: Feature 001 - UI Mockup & Phoenix Foundation
 
 **Session Accomplishments**:
 - ✅ Project initialized from claude-code-workflow-template
@@ -47,12 +48,17 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 - ✅ **GitHub Issues Created**: Issues #1-#7 for all MVP features
 - ✅ **Workflow Established**: Feature-based approach (issues → PRDs in `/docs/features/` → tasks in `/docs/tasks/`)
 
+**Session Accomplishments** (2025-11-21):
+- ✅ **Phoenix Project Initialized**: Successfully generated Phoenix LiveView project with correct app name `temporal_cookbook_ui`
+- ✅ **Config Files Cleaned**: Fixed duplicate configuration entries from multiple `mix phx.new` runs
+- ✅ **Server Verified**: Phoenix server running successfully at http://localhost:4000
+- ✅ **Gitignore Updated**: Merged Elixir/Phoenix-specific entries with existing Python/Node entries
+
 **Next Session Goals**:
-- Start Feature 1: Create wireframe sketches (digital or paper)
-- Initialize Phoenix LiveView project (`mix phx.new temporal_cookbook_ui --live --no-ecto`)
-- Configure Tailwind CSS and basic routing
+- Start Feature 1 implementation: Create routing structure for 3 pages
 - Set up base layout with navigation header
-- Mark Issue #1 in progress and create task checklist
+- Create placeholder LiveView modules (catalog, pattern detail, execution view)
+- Mark Issue #1 in progress and begin implementation
 
 ## Development Environment
 
@@ -61,14 +67,18 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 - **Backend Workers**: Go workers (Temporal SDK), Python workers (Temporal SDK)
 - **Infrastructure**: Temporal Dev Server, Phoenix Server
 
-### Development Commands (to be configured)
+### Development Commands
 - **Install Elixir Dependencies**: `mix deps.get`
-- **Run Phoenix Server**: `mix phx.server`
+- **Run Phoenix Server**: `mix phx.server` (runs on http://localhost:4000)
 - **Run Tests**: `mix test`
 - **Format Code**: `mix format`
-- **Start Temporal Dev Server**: `temporal server start-dev`
-- **Run Go Workers**: TBD (to be determined during setup)
-- **Run Python Workers**: TBD (to be determined during setup)
+- **Compile Assets**: `mix assets.deploy` (production)
+- **Start Temporal Dev Server**: `temporal server start-dev` (TBD - not yet configured)
+- **Run Go Workers**: TBD (to be determined during Feature 3-7)
+- **Run Python Workers**: TBD (to be determined during Feature 3-7)
+
+**App Name**: `temporal_cookbook_ui`
+**Module Names**: `TemporalCookbookUi` (core), `TemporalCookbookUiWeb` (web)
 
 ### Code Quality Configuration
 
@@ -108,25 +118,39 @@ extend-ignore = E203, W503
 - Include both positive and negative consequences of decisions
 
 ## Current Phase Issues (GitHub Milestone)
-<!-- Link to your GitHub issues and track progress -->
-- [ ] [#{{ISSUE_NUMBER}} - {{ISSUE_TITLE}}]({{ISSUE_URL}})
-- [ ] [#{{ISSUE_NUMBER}} - {{ISSUE_TITLE}}]({{ISSUE_URL}})
-- [ ] [#{{ISSUE_NUMBER}} - {{ISSUE_TITLE}}]({{ISSUE_URL}})
-<!-- Add all issues in current milestone -->
+**Milestone**: MVP Features (6-8 weeks)
+- [ ] [#1 - Feature 001: UI Mockup & Phoenix Foundation](https://github.com/jszod/temporal-cookbook-ui/issues/1) - In Progress
+- [ ] [#2 - Feature 002: LiteLLM Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/2)
+- [ ] [#3 - Feature 003: Tool Calling Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/3)
+- [ ] [#4 - Feature 004: Structured Outputs Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/4)
+- [ ] [#5 - Feature 005: Retry Policy Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/5)
+- [ ] [#6 - Feature 006: Durable Agent Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/6)
+- [ ] [#7 - Feature 007: Deep Research Pattern](https://github.com/jszod/temporal-cookbook-ui/issues/7)
 
 ## Key Files & Components
 <!-- Organize by your project's architecture -->
-**{{COMPONENT_CATEGORY}}:**
-- `{{FILE_PATH}}` - {{FILE_DESCRIPTION}}
-- `{{FILE_PATH}}` - {{FILE_DESCRIPTION}}
+**Phoenix LiveView (Web Layer):**
+- `lib/temporal_cookbook_ui_web/router.ex` - Application routing (to be configured)
+- `lib/temporal_cookbook_ui_web/endpoint.ex` - HTTP endpoint configuration
+- `lib/temporal_cookbook_ui_web/components/layouts/` - Base layouts and navigation
+- `lib/temporal_cookbook_ui_web/components/core_components.ex` - Reusable UI components
 
-**{{COMPONENT_CATEGORY}}:**
-- `{{FILE_PATH}}` - {{FILE_DESCRIPTION}}
-- `{{FILE_PATH}}` - {{FILE_DESCRIPTION}}
+**Core Application:**
+- `lib/temporal_cookbook_ui/application.ex` - OTP application supervisor tree
+- `lib/temporal_cookbook_ui.ex` - Application context module
 
 **Configuration:**
-- `{{CONFIG_PATH}}` - {{CONFIG_DESCRIPTION}}
-- `{{CONFIG_PATH}}` - {{CONFIG_DESCRIPTION}}
+- `config/config.exs` - Base application configuration
+- `config/dev.exs` - Development environment settings
+- `config/test.exs` - Test environment settings
+- `config/prod.exs` - Production environment settings
+- `config/runtime.exs` - Runtime configuration (secrets, env vars)
+- `mix.exs` - Project definition and dependencies
+
+**Assets:**
+- `assets/css/app.css` - Tailwind CSS styles
+- `assets/js/app.js` - JavaScript application entry point
+- `assets/tailwind.config.js` - Tailwind configuration
 
 ## Session Documentation
 

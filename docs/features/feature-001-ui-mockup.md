@@ -1,10 +1,11 @@
 # Feature 001: UI Mockup & Phoenix Foundation
 
 **GitHub Issue**: #1
-**Status**: Not Started
+**Status**: In Progress
 **Priority**: High
 **Estimate**: 2 days
-**Owner**: TBD
+**Owner**: @jszod
+**Started**: 2025-11-21
 
 ## Overview
 
@@ -188,11 +189,14 @@ Before building the UI, we need:
 
 #### Initialize Project
 ```bash
-mix phx.new temporal_cookbook_ui --live --no-ecto
-cd temporal_cookbook_ui
+# Run from parent directory (/Users/joeszodfridt/src/temporal/)
+cd /Users/joeszodfridt/src/temporal/temporal-cookbook-ui
+mix phx.new . --app temporal_cookbook_ui --live --no-ecto
 ```
 
 **Why `--no-ecto`**: We don't need a database for MVP - workflows stored in Temporal, no persistent UI data.
+
+**Note**: The directory name uses hyphens (`temporal-cookbook-ui`) while the app name uses underscores (`temporal_cookbook_ui`). This follows Elixir conventions.
 
 #### Configure Tailwind CSS
 
