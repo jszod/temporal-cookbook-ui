@@ -1,32 +1,32 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
+<header class="border-b border-zinc-200 bg-white">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between py-4">
+      <!-- Left: Logo and title -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div class="h-8 w-8 rounded bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+            T
+          </div>
+          <span class="text-lg font-semibold text-zinc-900">
+            Temporal AI Cookbook
+          </span>
+        </a>
+      </div>
+
+      <!-- Right: Worker Status -->
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-zinc-600">Worker:</span>
+        <div class="flex items-center gap-1.5">
+          <div class="h-2.5 w-2.5 rounded-full bg-green-500" title="Online"></div>
+          <span class="text-xs text-zinc-500">Online</span>
+        </div>
+      </div>
     </div>
   </div>
 </header>
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
+<main class="min-h-screen bg-zinc-50">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     <.flash_group flash={@flash} />
-    <%= @inner_content %>
+    {@inner_content}
   </div>
 </main>
