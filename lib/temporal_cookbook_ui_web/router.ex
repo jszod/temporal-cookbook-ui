@@ -18,8 +18,8 @@ defmodule TemporalCookbookUiWeb.Router do
     pipe_through :browser
 
     live "/", PatternCatalogLive
-    # live "/patterns/:pattern_id", PatternDetailLive
-    # live "/patterns/:pattern_id/executions/:workflow_id", ExecutionViewLive
+    live "/patterns/:pattern_id", PatternDetailLive
+    live "/patterns/:pattern_id/executions/:workflow_id", ExecutionViewLive
 
     # get "/", PageController, :home
   end
