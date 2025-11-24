@@ -17,7 +17,11 @@ defmodule TemporalCookbookUiWeb.Router do
   scope "/", TemporalCookbookUiWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PatternCatalogLive
+    live "/patterns/:pattern_id", PatternDetailLive
+    live "/patterns/:pattern_id/executions/:workflow_id", ExecutionViewLive
+
+    # get "/", PageController, :home
   end
 
   # Other scopes may use custom stacks.
