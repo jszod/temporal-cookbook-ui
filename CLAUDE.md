@@ -109,6 +109,97 @@ extend-ignore = E203, W503
 - Run `mix format` for Elixir, `go fmt` for Go, `black` for Python
 - Focus on actionable code quality issues, not formatting noise
 
+## Git Workflow & Branching Policy
+
+### Branch Strategy
+
+**⚠️ CRITICAL RULE: ALL development work MUST be done on feature branches.**
+
+Never commit directly to `main` branch. This policy applies to all work - features, bug fixes, documentation improvements, and even template/workflow enhancements.
+
+#### Branch Requirements
+- ❌ **NO direct commits to `main`** (except emergency hotfixes with explicit approval)
+- ✅ **ALL work on feature branches**: `feature/XXX-description` or `fix/XXX-description`
+- ✅ **Include issue number when applicable**: `feature/2-litellm-pattern`
+- ✅ **Even template/workflow improvements**: `feature/template-integration`
+- ✅ **Descriptive branch names**: Use clear, kebab-case descriptions
+
+#### Branch Naming Convention
+```
+feature/XXX-short-description   # New features
+fix/XXX-short-description       # Bug fixes
+docs/topic-description          # Documentation only
+refactor/component-name         # Code refactoring
+```
+
+#### Workflow Process
+
+1. **Create feature branch from main**:
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/XXX-description
+   ```
+
+2. **Do all work on feature branch**:
+   - Make commits with clear messages
+   - Test thoroughly
+   - Update documentation
+   - Check off task list items
+
+3. **Push feature branch to remote**:
+   ```bash
+   git push -u origin feature/XXX-description
+   ```
+
+4. **Create Pull Request**:
+   - Use GitHub UI or `gh pr create`
+   - Reference issue number in PR description
+   - Include summary of changes
+   - Note any testing performed
+
+5. **Self-review PR**:
+   - Review all file changes
+   - Run tests one final time
+   - Check that all acceptance criteria met
+   - Verify no unintended changes included
+
+6. **Merge to main via PR**:
+   - Merge using GitHub UI (even in solo development)
+   - Delete feature branch after merge
+   - Pull updated main locally
+
+#### Why This Matters
+
+- **Clean history**: Main branch contains only completed, reviewed work
+- **Easy rollback**: Can revert entire feature by reverting single merge commit
+- **PR practice**: Maintains professional git workflow habits
+- **CI/CD ready**: Main branch always in deployable state
+- **Code review**: PR process enables review even in solo work
+- **Documentation**: PR descriptions document what changed and why
+
+#### Exceptions (Extremely Rare)
+
+Only commit directly to main for:
+- **Critical documentation fixes**: Typos, broken links, formatting (must be trivial)
+- **Emergency hotfixes**: Production-breaking bugs (must document in commit message why direct commit)
+
+When in doubt, use a feature branch. The overhead is minimal and the benefits are significant.
+
+#### Recovery from Accidental Main Commits
+
+If you accidentally commit to main:
+
+```bash
+# Option 1: Move commit to feature branch (if not pushed)
+git branch feature/topic-name      # Create branch at current commit
+git reset --hard HEAD~1           # Move main back one commit
+git checkout feature/topic-name   # Switch to feature branch
+
+# Option 2: If already pushed to main
+# Accept the violation, document it, create PR for future changes
+```
+
 ## Feature Development Workflow
 
 ### Using Feature Templates
