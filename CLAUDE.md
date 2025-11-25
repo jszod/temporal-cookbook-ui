@@ -109,6 +109,80 @@ extend-ignore = E203, W503
 - Run `mix format` for Elixir, `go fmt` for Go, `black` for Python
 - Focus on actionable code quality issues, not formatting noise
 
+## Feature Development Workflow
+
+### Using Feature Templates
+
+**Template Location**: `docs/templates/`
+
+Feature development in this project follows a structured workflow using templates to ensure comprehensive specifications and systematic implementation.
+
+#### Available Templates
+- **FEATURE_PRD_TEMPLATE.md**: Comprehensive feature specification template
+- **TASK_GENERATION_TEMPLATE.md**: Hierarchical task breakdown template
+- **README.md**: Complete guide to using templates effectively
+
+#### Workflow Process
+
+1. **Start with GitHub Issue**: Review feature requirements in issue #XXX
+   - Read the issue description and acceptance criteria
+   - Understand how feature fits into overall project goals (see PLAN.md)
+
+2. **Create Feature PRD**:
+   ```bash
+   cp docs/templates/FEATURE_PRD_TEMPLATE.md docs/features/feature-XXX-name.md
+   ```
+   - Fill out all sections systematically
+   - Key sections: Problem Statement, Goals, User Stories, Functional Requirements
+   - Document Non-Goals explicitly to prevent scope creep
+   - Link to GitHub issue and PLAN.md
+   - Review for completeness before moving to tasks
+
+3. **Generate Task List**:
+   ```bash
+   cp docs/templates/TASK_GENERATION_TEMPLATE.md docs/tasks/tasks-XXX-name.md
+   ```
+   - Break down PRD into hierarchical tasks (Parent tasks → Sub-tasks)
+   - Identify all files to create/modify with rationale
+   - Each sub-task should be 1-2 hours max
+   - Include setup, implementation, testing, documentation, and review tasks
+
+4. **Link Documents**:
+   - Update GitHub issue description with links to PRD and task files
+   - Update PLAN.md to reference feature status
+   - Add feature to "Current Session Focus" when starting work
+
+5. **Implementation**:
+   - Create feature branch: `git checkout -b feature/XXX-name`
+   - Follow task list systematically, checking off tasks as completed (`- [ ]` → `- [x]`)
+   - Use TodoWrite for session-level micro-tasks (more granular than task file)
+   - Commit task file updates with related code changes
+   - Update GitHub issue checklist only when major milestones complete
+
+#### Template Customization
+- Templates are living documents - adapt for project needs
+- Keep core structure but adjust sections as needed
+- Document significant customizations in `docs/templates/README.md`
+- Lighter-weight specs OK for simple features (see Feature 001 as example)
+- More comprehensive specs for complex features (e.g., Feature 002)
+
+#### Quality Checklist
+Before starting implementation, ensure PRD has:
+- [ ] Clear problem statement connected to project goals
+- [ ] Specific, testable user stories with acceptance criteria
+- [ ] Explicit non-goals (what's out of scope)
+- [ ] Technical considerations and dependencies identified
+- [ ] Success metrics defined
+
+#### Integration with TodoWrite
+- **Task File** (permanent record): Hierarchical feature-level tasks, version controlled
+- **TodoWrite** (session tracking): Real-time micro-tasks during implementation, not version controlled
+- Task file says "Implement email validation", TodoWrite tracks "Set up validator function, Add regex, Write tests"
+
+#### Examples
+- **Well-formed PRD**: `docs/features/feature-001-ui-mockup.md`
+- **Template Guide**: `docs/templates/README.md`
+
 ## Architecture Decisions Made
 **ADR Location**: `docs/decisions/`
 **Current Decisions**:

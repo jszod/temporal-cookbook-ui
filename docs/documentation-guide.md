@@ -35,6 +35,17 @@ docs/
 
 ## Document Templates & Guidelines
 
+### Feature Development Templates
+**Location**: `docs/templates/`
+
+Templates for creating comprehensive feature specifications and implementation plans:
+
+- **FEATURE_PRD_TEMPLATE.md**: Feature-level PRD template with sections for problem statement, goals, user stories, functional requirements, technical considerations, and success metrics
+- **TASK_GENERATION_TEMPLATE.md**: Hierarchical task breakdown template for systematic implementation
+- **README.md**: Complete guide to using feature templates effectively
+
+See **CLAUDE.md "Feature Development Workflow"** section for detailed usage instructions.
+
 ### Session Notes Template
 **File**: `docs/sessions/session-{NNN}-{topic}.md`
 
