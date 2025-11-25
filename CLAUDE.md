@@ -109,6 +109,171 @@ extend-ignore = E203, W503
 - Run `mix format` for Elixir, `go fmt` for Go, `black` for Python
 - Focus on actionable code quality issues, not formatting noise
 
+## Git Workflow & Branching Policy
+
+### Branch Strategy
+
+**⚠️ CRITICAL RULE: ALL development work MUST be done on feature branches.**
+
+Never commit directly to `main` branch. This policy applies to all work - features, bug fixes, documentation improvements, and even template/workflow enhancements.
+
+#### Branch Requirements
+- ❌ **NO direct commits to `main`** (except emergency hotfixes with explicit approval)
+- ✅ **ALL work on feature branches**: `feature/XXX-description` or `fix/XXX-description`
+- ✅ **Include issue number when applicable**: `feature/2-litellm-pattern`
+- ✅ **Even template/workflow improvements**: `feature/template-integration`
+- ✅ **Descriptive branch names**: Use clear, kebab-case descriptions
+
+#### Branch Naming Convention
+```
+feature/XXX-short-description   # New features
+fix/XXX-short-description       # Bug fixes
+docs/topic-description          # Documentation only
+refactor/component-name         # Code refactoring
+```
+
+#### Workflow Process
+
+1. **Create feature branch from main**:
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/XXX-description
+   ```
+
+2. **Do all work on feature branch**:
+   - Make commits with clear messages
+   - Test thoroughly
+   - Update documentation
+   - Check off task list items
+
+3. **Push feature branch to remote**:
+   ```bash
+   git push -u origin feature/XXX-description
+   ```
+
+4. **Create Pull Request**:
+   - Use GitHub UI or `gh pr create`
+   - Reference issue number in PR description
+   - Include summary of changes
+   - Note any testing performed
+
+5. **Self-review PR**:
+   - Review all file changes
+   - Run tests one final time
+   - Check that all acceptance criteria met
+   - Verify no unintended changes included
+
+6. **Merge to main via PR**:
+   - Merge using GitHub UI (even in solo development)
+   - Delete feature branch after merge
+   - Pull updated main locally
+
+#### Why This Matters
+
+- **Clean history**: Main branch contains only completed, reviewed work
+- **Easy rollback**: Can revert entire feature by reverting single merge commit
+- **PR practice**: Maintains professional git workflow habits
+- **CI/CD ready**: Main branch always in deployable state
+- **Code review**: PR process enables review even in solo work
+- **Documentation**: PR descriptions document what changed and why
+
+#### Exceptions (Extremely Rare)
+
+Only commit directly to main for:
+- **Critical documentation fixes**: Typos, broken links, formatting (must be trivial)
+- **Emergency hotfixes**: Production-breaking bugs (must document in commit message why direct commit)
+
+When in doubt, use a feature branch. The overhead is minimal and the benefits are significant.
+
+#### Recovery from Accidental Main Commits
+
+If you accidentally commit to main:
+
+```bash
+# Option 1: Move commit to feature branch (if not pushed)
+git branch feature/topic-name      # Create branch at current commit
+git reset --hard HEAD~1           # Move main back one commit
+git checkout feature/topic-name   # Switch to feature branch
+
+# Option 2: If already pushed to main
+# Accept the violation, document it, create PR for future changes
+```
+
+## Feature Development Workflow
+
+### Using Feature Templates
+
+**Template Location**: `docs/templates/`
+
+Feature development in this project follows a structured workflow using templates to ensure comprehensive specifications and systematic implementation.
+
+#### Available Templates
+- **FEATURE_PRD_TEMPLATE.md**: Comprehensive feature specification template
+- **TASK_GENERATION_TEMPLATE.md**: Hierarchical task breakdown template
+- **README.md**: Complete guide to using templates effectively
+
+#### Workflow Process
+
+1. **Start with GitHub Issue**: Review feature requirements in issue #XXX
+   - Read the issue description and acceptance criteria
+   - Understand how feature fits into overall project goals (see PLAN.md)
+
+2. **Create Feature PRD**:
+   ```bash
+   cp docs/templates/FEATURE_PRD_TEMPLATE.md docs/features/feature-XXX-name.md
+   ```
+   - Fill out all sections systematically
+   - Key sections: Problem Statement, Goals, User Stories, Functional Requirements
+   - Document Non-Goals explicitly to prevent scope creep
+   - Link to GitHub issue and PLAN.md
+   - Review for completeness before moving to tasks
+
+3. **Generate Task List**:
+   ```bash
+   cp docs/templates/TASK_GENERATION_TEMPLATE.md docs/tasks/tasks-XXX-name.md
+   ```
+   - Break down PRD into hierarchical tasks (Parent tasks → Sub-tasks)
+   - Identify all files to create/modify with rationale
+   - Each sub-task should be 1-2 hours max
+   - Include setup, implementation, testing, documentation, and review tasks
+
+4. **Link Documents**:
+   - Update GitHub issue description with links to PRD and task files
+   - Update PLAN.md to reference feature status
+   - Add feature to "Current Session Focus" when starting work
+
+5. **Implementation**:
+   - Create feature branch: `git checkout -b feature/XXX-name`
+   - Follow task list systematically, checking off tasks as completed (`- [ ]` → `- [x]`)
+   - Use TodoWrite for session-level micro-tasks (more granular than task file)
+   - Commit task file updates with related code changes
+   - Update GitHub issue checklist only when major milestones complete
+
+#### Template Customization
+- Templates are living documents - adapt for project needs
+- Keep core structure but adjust sections as needed
+- Document significant customizations in `docs/templates/README.md`
+- Lighter-weight specs OK for simple features (see Feature 001 as example)
+- More comprehensive specs for complex features (e.g., Feature 002)
+
+#### Quality Checklist
+Before starting implementation, ensure PRD has:
+- [ ] Clear problem statement connected to project goals
+- [ ] Specific, testable user stories with acceptance criteria
+- [ ] Explicit non-goals (what's out of scope)
+- [ ] Technical considerations and dependencies identified
+- [ ] Success metrics defined
+
+#### Integration with TodoWrite
+- **Task File** (permanent record): Hierarchical feature-level tasks, version controlled
+- **TodoWrite** (session tracking): Real-time micro-tasks during implementation, not version controlled
+- Task file says "Implement email validation", TodoWrite tracks "Set up validator function, Add regex, Write tests"
+
+#### Examples
+- **Well-formed PRD**: `docs/features/feature-001-ui-mockup.md`
+- **Template Guide**: `docs/templates/README.md`
+
 ## Architecture Decisions Made
 **ADR Location**: `docs/decisions/`
 **Current Decisions**:
