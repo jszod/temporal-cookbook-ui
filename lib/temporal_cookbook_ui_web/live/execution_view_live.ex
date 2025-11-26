@@ -137,6 +137,20 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
     Process.send_after(self(), :poll_workflow, 2000)
   end
 
+  defp format_response_text(nil), do: "No response text"
+
+  defp format_response_text(text) when is_binary(text) do
+    # Trim all types of whitespace (including non-breaking spaces, tabs, etc.)
+    trimmed =
+      text
+      |> String.trim_leading()
+      |> String.trim_trailing()
+
+    if trimmed == "", do: "No response text", else: trimmed
+  end
+
+  defp format_response_text(_), do: "No response text"
+
   # ===== RENDER (Final Converter) =====
   # The render function is the final converter that formats all data for display.
   def render(assigns) do
@@ -215,7 +229,7 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
               <h2 class="text-lg font-semibold text-gray-900 mb-3">LLM Response</h2>
               <div class="p-4 bg-gray-50 rounded-lg border">
                 <p class="text-gray-800 whitespace-pre-wrap">
-                  {@result["text"] || "No response text"}
+                  {format_response_text(@result["text"])}
                 </p>
               </div>
             </div>

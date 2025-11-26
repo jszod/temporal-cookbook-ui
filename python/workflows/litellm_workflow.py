@@ -147,7 +147,7 @@ class LitellmWorkflow:
         if raw_response.get("choices") and len(raw_response["choices"]) > 0:
             first_choice = raw_response["choices"][0]
             if "message" in first_choice and "content" in first_choice["message"]:
-                text = first_choice["message"]["content"]
+                text = first_choice["message"]["content"].strip()  # Remove leading/trailing whitespace
         
         # Extract token usage
         usage = raw_response.get("usage", {})
