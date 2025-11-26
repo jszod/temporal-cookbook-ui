@@ -8,7 +8,13 @@ defmodule TemporalCookbookUiWeb.PatternDetailLiveTest do
       {:ok, view, _html} = live(conn, ~p"/patterns/1")
 
       assert has_element?(view, "h1", "Hello World Litellm")
-      assert has_element?(view, "p", "Use Litellm to provide AI capabilities within your Temporal workflows.")
+
+      assert has_element?(
+               view,
+               "p",
+               "Use Litellm to provide AI capabilities within your Temporal workflows."
+             )
+
       assert has_element?(view, "span", "Easy")
     end
 

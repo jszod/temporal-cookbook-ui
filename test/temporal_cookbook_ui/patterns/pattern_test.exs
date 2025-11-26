@@ -47,7 +47,10 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       assert %Pattern{} = pattern
       assert pattern.id == 1
       assert pattern.name == "Hello World Litellm"
-      assert pattern.description == "Use Litellm to provide AI capabilities within your Temporal workflows."
+
+      assert pattern.description ==
+               "Use Litellm to provide AI capabilities within your Temporal workflows."
+
       assert pattern.complexity == "Easy"
     end
 

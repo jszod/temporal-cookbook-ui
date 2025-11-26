@@ -233,7 +233,7 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
                 </p>
               </div>
             </div>
-
+            
     <!-- Metrics -->
             <div>
               <h2 class="text-lg font-semibold text-gray-900 mb-3">Metrics</h2>
@@ -281,7 +281,7 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
             <p class="text-red-800">{@error || "Unknown error"}</p>
           </div>
         <% end %>
-
+        
     <!-- Temporal UI Link -->
         <div class="mt-8 pt-6 border-t">
           <a
@@ -292,7 +292,7 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
             View in Temporal UI →
           </a>
         </div>
-
+        
     <!-- Run Again Button -->
         <div class="mt-6">
           <.link

@@ -3,7 +3,7 @@
 **Feature PRD**: docs/features/feature-002-litellm-pattern.md
 **GitHub Issue**: #2
 **Status**: In Progress - Core Implementation Complete, Testing in Progress
-**Last Updated**: 2025-11-25
+**Last Updated**: 2025-11-25 (Updated: Added Temporal Server status and multi-worker support)
 
 ---
 
@@ -28,7 +28,7 @@
 
 **Elixir/Phoenix**:
 - `lib/temporal_cookbook_ui/temporal/client.ex` - Temporal gRPC client wrapper
-- `lib/temporal_cookbook_ui_web/components/worker_status.ex` - Worker status LiveComponent
+- `lib/temporal_cookbook_ui_web/components/infrastructure_status.ex` - Infrastructure status LiveComponent (Temporal Server + Workers)
 - `lib/temporal_cookbook_ui_web/components/workflow_controls.ex` - Workflow input controls LiveComponent
 
 **Documentation**:
@@ -40,7 +40,7 @@
 
 - `lib/temporal_cookbook_ui_web/live/pattern_detail_live.ex` - Enhance with LiteLLM controls
 - `lib/temporal_cookbook_ui_web/live/execution_view_live.ex` - Implement real workflow visualization
-- `lib/temporal_cookbook_ui_web/components/layouts/root.html.heex` - Add worker status to navbar
+- `lib/temporal_cookbook_ui_web/components/layouts/app.html.heex` - Add infrastructure status to navbar
 - `mix.exs` - Add Temporal client dependency (if using library)
 - `docs/PLAN.md` - Update Feature 2 and Feature 5 scope
 - `docs/PRD.md` - Update worker management section
@@ -161,12 +161,41 @@
   - [ ] **3.6.4** Integrate with Phoenix PubSub for LiveView updates
 
 ### Phoenix UI Components
-- [ ] **4.0 Create worker status component**
-  - [ ] **4.1** Create `lib/temporal_cookbook_ui_web/components/worker_status.ex` LiveComponent
-  - [ ] **4.2** Implement health check mechanism (poll Temporal task queue or worker heartbeat)
-  - [ ] **4.3** Add status state (online/offline) with visual indicator (🟢/🔴)
-  - [ ] **4.4** Add tooltip or info icon with worker management instructions
-  - [ ] **4.5** Integrate into navbar layout (`root.html.heex`)
+- [ ] **4.0 Create infrastructure status component**
+  - [ ] **4.1** Create `lib/temporal_cookbook_ui_web/components/infrastructure_status.ex` LiveComponent
+  - [ ] **4.2** Implement Temporal Server health check (using CLI approach)
+    - Use `temporal cluster health` CLI command to test server connectivity
+    - Alternative: Try lightweight `temporal workflow list` command if health command unavailable
+    - Handle connection failures gracefully (CLI not found, server down, timeouts)
+    - Update status state (online/offline) with visual indicator (🟢/🔴)
+    - Add function to `Client` module: `check_server_health/0` -> `{:ok, :online}` or `{:error, reason}`
+  - [ ] **4.3** Implement worker health check (using CLI approach)
+    - Add `describe_task_queue/1` function to `Client` module
+    - Use `temporal task-queue describe --task-queue temporal-cookbook-examples` CLI command
+    - Parse CLI output to extract poller/worker count from output
+    - Handle cases: 0 workers, 1 worker, multiple workers
+    - Update status state with count (e.g., "🟢 3 Online" or "🔴 0 Online")
+    - Handle parsing errors gracefully (fallback to 0 if parse fails)
+  - [ ] **4.4** Add polling mechanism for real-time status updates
+    - Use LiveView `handle_info` with `Process.send_after` for polling
+    - Poll every 5-10 seconds (start with 5 seconds, can adjust)
+    - Update both Temporal Server and Worker status on each poll
+    - Handle errors gracefully (show last known state on error, don't crash)
+    - Initialize with "unknown" state until first poll completes
+  - [ ] **4.5** Add visual indicators for both statuses
+    - Temporal Server: 🟢 Online / 🔴 Offline / ⚪ Unknown (initial state)
+    - Workers: 🟢 N Online / 🔴 0 Online / ⚪ Unknown (where N = count)
+    - Display format: "Temporal: 🟢 Online | Workers: 🟢 3 Online"
+    - Use Tailwind classes for colors (green-500, red-500, gray-400)
+  - [ ] **4.6** Add tooltip or info icon with infrastructure management instructions
+    - Explain that workers are infrastructure, not UI-controlled
+    - Provide instructions for manual worker control
+    - Explain how to start/stop Temporal Dev Server
+    - Use Phoenix CoreComponents tooltip or simple title attribute
+  - [ ] **4.7** Integrate into navbar layout (`app.html.heex`)
+    - Replace hardcoded status (lines 16-23) with LiveComponent
+    - Ensure responsive design for mobile (stack on small screens if needed)
+    - Mount component in root layout or app layout
 
 - [x] **4.6 Create workflow controls component**
   - [x] **4.6.1** Create `lib/temporal_cookbook_ui_web/components/workflow_controls.ex` LiveComponent
@@ -226,10 +255,13 @@
 ### Testing & Quality
 - [ ] **5.0 Write comprehensive tests**
   - [ ] **5.1** Unit tests for Temporal client wrapper functions
-  - [ ] **5.2** Unit tests for worker status health check logic
+  - [ ] **5.2** Unit tests for Temporal Server health check logic
+- [ ] **5.2.1** Unit tests for worker count health check logic
   - [ ] **5.3** Unit tests for workflow input validation
   - [ ] **5.4** Integration tests for end-to-end workflow execution
-  - [ ] **5.5** Integration tests for worker status updates
+  - [ ] **5.5** Integration tests for infrastructure status updates
+  - [ ] **5.5.1** Test Temporal Server status updates when server stops/starts
+  - [ ] **5.5.2** Test worker count updates when workers stop/start (0, 1, multiple workers)
   - [ ] **5.6** All tests passing
 
 - [ ] **5.7 Manual testing**
@@ -237,8 +269,9 @@
   - [ ] **5.7.2** Test with Anthropic provider
   - [ ] **5.7.3** Test with Groq provider
   - [ ] **5.7.4** Test with Ollama (local) provider
-  - [ ] **5.7.5** Test worker failure/recovery demonstration
-  - [ ] **5.7.6** Test error handling (invalid API keys, network failures)
+  - [ ] **5.7.5** Test Temporal Server failure/recovery demonstration
+  - [ ] **5.7.6** Test worker failure/recovery demonstration (single and multiple workers)
+  - [ ] **5.7.7** Test error handling (invalid API keys, network failures)
 
 ### Documentation & Integration
 - [ ] **6.0 Documentation and cleanup**
@@ -288,7 +321,7 @@
 
 **🔄 In Progress:**
 - Testing with different providers (Ollama ✅, OpenAI ⏳)
-- Worker status component (task 4.0)
+- Infrastructure status component (task 4.0) - Temporal Server + Worker count
 - Enhanced execution view features
 
 **📝 Known Issues:**
@@ -299,7 +332,7 @@
 ### Current Focus
 **✅ Completed**: Core workflow execution pipeline (worker, workflow, activity, UI)
 **🔄 Next Priority**: 
-- Task 4.0 - Worker status component (show online/offline status in UI)
+- Task 4.0 - Infrastructure status component (show Temporal Server + Worker count in UI)
 - Task 5.7 - Manual testing with all providers
 - Task 3.5.2 - Consider replacing CLI bridge with proper gRPC client (optional enhancement)
 
@@ -317,6 +350,7 @@ None currently
 - **Provider Mapping Location**: Provider-to-model mapping implemented in Elixir/Phoenix UI layer (not Python). Rationale: UI owns provider selection, Python worker receives model strings directly. See Feature 002 PRD for details.
 - **Response Parsing**: Response parsing implemented in workflow (not activity). Activity returns raw LiteLLM response; workflow parses to extract text, tokens, metrics per PRD requirements.
 - **Temporal Client**: Client implemented using Temporal CLI bridge. Works for MVP, can be replaced with proper gRPC client later (task 3.5.2) for production use.
+- **Infrastructure Status**: Display both Temporal Server status and Worker count. Temporal Server health check via gRPC ping, Worker count via DescribeTaskQueue API. Supports multiple workers (production-realistic scenario).
 - **Ollama Configuration**: Explicit OLLAMA_API_BASE environment variable support added. Defaults to http://localhost:11434 if not set.
 - **Provider Support**: Currently configured for OpenAI and Ollama. Ollama tested with gemma3:latest model.
 - **Environment Variables**: `.env.example` template created at project root. API keys configured via environment variables for Python worker (LiteLLM reads from env).

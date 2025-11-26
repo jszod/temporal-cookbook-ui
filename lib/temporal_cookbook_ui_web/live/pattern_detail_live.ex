@@ -82,7 +82,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Pattern Details</h2>
           <p class="text-gray-600">This is a placeholder for pattern-specific content.</p>
         </div>
-        
+
     <!-- Right Panel: Workflow Controls -->
         <%= if @pattern.id == "1" do %>
           <.live_component module={WorkflowControls} id="workflow-controls" />

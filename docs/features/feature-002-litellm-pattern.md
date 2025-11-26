@@ -5,7 +5,7 @@
 **Priority**: High
 **Implementation Tasks**: docs/tasks/tasks-002-litellm-pattern.md
 **Related ADR**: docs/decisions/001-shared-worker-architecture.md
-**Last Updated**: 2025-11-25
+**Last Updated**: 2025-11-25 (Updated: Added Temporal Server status and multi-worker support)
 
 ---
 
@@ -74,16 +74,18 @@ This feature directly supports the project's core value proposition: transformin
 - [ ] I can see basic event timeline (enhanced in Feature 7)
 - [ ] I can navigate back to pattern detail page
 
-### User Story 3: Understand Worker Architecture
+### User Story 3: Understand Infrastructure Status
 **As a** developer learning production Temporal patterns
-**I want to** see worker status and understand how workers are managed
-**So that** I learn the correct Temporal architecture (workers as infrastructure)
+**I want to** see Temporal Server and worker status to understand system health
+**So that** I learn the correct Temporal architecture (workers as infrastructure) and can debug issues
 
 **Acceptance Criteria**:
-- [ ] I see worker status indicator in navbar (🟢 Online / 🔴 Offline)
-- [ ] I see instructions for manually controlling the worker
+- [ ] I see Temporal Server status indicator in navbar (🟢 Online / 🔴 Offline)
+- [ ] I see worker count indicator in navbar (e.g., "🟢 3 Online" or "🔴 0 Online")
+- [ ] I see instructions for manually controlling workers
 - [ ] I understand that workers are infrastructure, not UI-controlled
-- [ ] I can demonstrate failure recovery by stopping/starting worker manually
+- [ ] I can demonstrate failure recovery by stopping/starting workers manually
+- [ ] I can see when multiple workers are running (production-realistic scenario)
 
 ---
 
@@ -124,10 +126,13 @@ This feature directly supports the project's core value proposition: transformin
    - Token usage and latency metrics
    - Basic event timeline (full visualization in Feature 7)
 
-5. **Worker Status Monitoring**:
-   - Health check mechanism (poll Temporal task queue or worker heartbeat)
-   - UI status badge showing worker online/offline
-   - Demo instructions in UI for manual worker control
+5. **Infrastructure Status Monitoring**:
+   - **Temporal Server Health Check**: Ping gRPC endpoint (localhost:7233) to verify server connectivity
+   - **Worker Health Check**: Query Temporal DescribeTaskQueue API to count active workers polling the task queue
+   - **UI Status Display**: Show both Temporal Server status and worker count in navbar
+   - **Multi-Worker Support**: Display count of active workers (e.g., "3 Online" or "0 Online")
+   - **Real-time Updates**: Poll status every 5-10 seconds and update UI accordingly
+   - **Demo Instructions**: Tooltip or info icon with worker management instructions
 
 ### User Interactions
 - **Provider Selection**: User selects LLM provider from dropdown
@@ -141,7 +146,8 @@ This feature directly supports the project's core value proposition: transformin
 - **Workflow Input**: Provider name, prompt text, temperature, max_tokens
 - **Workflow Output**: LLM response text, token usage, latency, cost estimate
 - **Workflow Events**: Temporal event history for visualization
-- **Worker Status**: Online/offline state from health checks
+- **Temporal Server Status**: Online/offline state from gRPC health check
+- **Worker Status**: Count of active workers from DescribeTaskQueue API
 
 ---
 
@@ -187,8 +193,10 @@ This feature directly supports the project's core value proposition: transformin
 - Back navigation to pattern detail
 
 **Navbar**:
-- Worker status indicator: 🟢 Online / 🔴 Offline
-- Tooltip or info icon with worker management instructions
+- Temporal Server status indicator: 🟢 Online / 🔴 Offline
+- Worker count indicator: 🟢 N Online / 🔴 0 Online (where N = number of active workers)
+- Tooltip or info icon with infrastructure management instructions
+- Example display: "Temporal: 🟢 Online | Workers: 🟢 3 Online"
 
 ### Mockups/Wireframes
 See Feature 001 wireframes for layout structure. This feature implements the functionality behind those wireframes.
@@ -230,7 +238,7 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 - **PatternDetailLive**: Enhance existing placeholder with LiteLLM controls
 - **ExecutionViewLive**: Implement real workflow visualization (currently placeholder)
 - **Temporal Client**: New module for Temporal gRPC operations
-- **Worker Status Component**: New component for navbar integration
+- **Infrastructure Status Component**: New component for navbar integration (Temporal Server + Worker status)
 - **Router**: No changes needed (routes already defined in Feature 001)
 
 ### Constraints
@@ -284,7 +292,7 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 - `lib/temporal_cookbook_ui/temporal/client.ex` - Temporal gRPC client wrapper (new)
 - `lib/temporal_cookbook_ui_web/live/pattern_detail_live.ex` - Enhance with LiteLLM controls (modify)
 - `lib/temporal_cookbook_ui_web/live/execution_view_live.ex` - Implement visualization (modify)
-- `lib/temporal_cookbook_ui_web/components/worker_status.ex` - Worker status component (new)
+- `lib/temporal_cookbook_ui_web/components/infrastructure_status.ex` - Infrastructure status component (Temporal Server + Workers) (new)
 - `lib/temporal_cookbook_ui_web/components/workflow_controls.ex` - Workflow input controls (new)
 
 **Documentation** (new/modify):
@@ -302,21 +310,25 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 - **Workflow Launch Success Rate**: 95%+ workflows start successfully from UI
 - **Real-Time Update Latency**: < 200ms delay for workflow status updates
 - **Provider Support**: All 4 providers (OpenAI, Anthropic, Groq, Ollama) functional
-- **Worker Status Accuracy**: Health check correctly identifies worker online/offline state
+- **Temporal Server Status Accuracy**: Health check correctly identifies server online/offline state
+- **Worker Status Accuracy**: Health check correctly counts active workers (supports 0-N workers)
 - **User Experience**: User can complete full workflow (launch → view execution → see result) in < 30 seconds
 
 ### Testing Strategy
 - **Unit Tests**: 
   - Temporal client wrapper functions (start workflow, get history, query state)
-  - Worker status health check logic
+  - Temporal Server health check logic (gRPC connection test)
+  - Worker status health check logic (DescribeTaskQueue API)
   - Workflow input validation
 - **Integration Tests**:
   - End-to-end workflow execution (UI → Phoenix → Temporal → Worker → Response)
-  - Worker status updates when worker stops/starts
+  - Temporal Server status updates when server stops/starts
+  - Worker status updates when workers stop/start (test with 0, 1, and multiple workers)
   - Multi-provider workflow execution
 - **Manual Testing**:
   - Test with all 4 providers (OpenAI, Anthropic, Groq, Ollama)
-  - Test worker failure/recovery demonstration
+  - Test Temporal Server failure/recovery demonstration
+  - Test worker failure/recovery demonstration (single and multiple workers)
   - Test error handling (invalid API keys, network failures)
 
 ### Definition of Done
@@ -326,7 +338,7 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 - [ ] Temporal client integration functional
 - [ ] UI controls implemented and functional
 - [ ] Real-time execution visualization working
-- [ ] Worker status monitoring operational
+- [ ] Infrastructure status monitoring operational (Temporal Server + Workers)
 - [ ] Tests written and passing
 - [ ] Documentation updated (PRD, PLAN, ADR)
 - [ ] Manual testing completed with all providers
@@ -337,12 +349,15 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 
 ### Clarifications Needed
 - [x] Worker architecture decision (resolved: shared worker per ADR 001)
+- [x] Infrastructure status display (resolved: show both Temporal Server and Worker count)
 - [ ] Elixir Temporal client library selection (tortoise vs temporalio/sdk-elixir vs direct gRPC)
-- [ ] Worker health check mechanism (poll task queue vs worker heartbeat vs Temporal API)
+- [ ] Temporal Server health check mechanism (gRPC ping vs connection test)
+- [ ] Worker health check mechanism (DescribeTaskQueue API vs polling workflow execution)
 
 ### Decisions Pending
 - [ ] Temporal client library choice (to be determined during implementation)
-- [ ] Health check implementation approach (to be determined during implementation)
+- [ ] Temporal Server health check implementation approach (gRPC ping recommended)
+- [ ] Worker health check implementation approach (DescribeTaskQueue API recommended for accurate count)
 
 ---
 
@@ -386,12 +401,12 @@ See Feature 001 wireframes for layout structure. This feature implements the fun
 
 ### 🔄 In Progress
 - **Provider Testing**: Ollama ✅, OpenAI ⏳ (needs API key), Anthropic/Groq pending
-- **Worker Status Component**: UI indicator for worker online/offline status
+- **Infrastructure Status Component**: UI indicator for Temporal Server and worker count status
 - **Enhanced Features**: Event timeline visualization, advanced error handling
 
 ### 📋 Remaining
 - Comprehensive testing across all providers
-- Worker status monitoring component
+- Infrastructure status monitoring component (Temporal Server + Worker count)
 - Enhanced execution view features
 - Documentation updates
 - Code review and cleanup

@@ -65,7 +65,7 @@ First complete pattern implementation - LiteLLM with multi-provider support.
 - Real-time visualization: timeline showing LLM activity execution
 - Multi-provider support: OpenAI, Anthropic, Groq, local Ollama
 - Interactive controls: model dropdown, prompt textarea, temperature/max_tokens sliders
-- Worker status monitoring: UI shows worker online/offline status (workers are infrastructure, not UI-controlled)
+- Infrastructure status monitoring: UI shows Temporal Server status and worker count (supports multiple workers, production-realistic)
 
 **Exit Criteria**: User can run LiteLLM workflow with any provider, see real-time execution, view LLM responses. Worker runs as single process (production-realistic architecture).
 
@@ -76,7 +76,7 @@ First complete pattern implementation - LiteLLM with multi-provider support.
 - ✅ Temporal client integration (CLI bridge)
 - ✅ Ollama support configured and tested
 - 🔄 Testing with all providers (Ollama ✅, others pending)
-- ⏳ Worker status component (task 4.0)
+- ⏳ Infrastructure status component (Temporal Server + Worker count) (task 4.0)
 
 ---
 

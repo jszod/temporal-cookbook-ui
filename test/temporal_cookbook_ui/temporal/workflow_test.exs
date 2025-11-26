@@ -133,8 +133,10 @@ defmodule TemporalCookbookUi.Temporal.WorkflowTest do
       parts = String.split(id, "-")
       assert length(parts) >= 3
       assert List.first(parts) == "test"
-      assert String.to_integer(Enum.at(parts, 1)) > 0  # timestamp
-      assert String.to_integer(Enum.at(parts, 2)) > 0  # random number
+      # timestamp
+      assert String.to_integer(Enum.at(parts, 1)) > 0
+      # random number
+      assert String.to_integer(Enum.at(parts, 2)) > 0
     end
 
     test "generates different IDs on each call" do
