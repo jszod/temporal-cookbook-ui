@@ -16,7 +16,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
     pattern_id = socket.assigns.pattern.id
 
     # Map provider to model string using provider config
-    provider = Map.get(params, "provider", "openai")
+    provider = Map.get(params, "provider", "ollama")
     model = ProviderConfig.model_for_provider(provider)
     prompt = Map.get(params, "prompt", "")
     temperature = parse_float(params["temperature"])

@@ -14,11 +14,11 @@
 **Description**: Create new `LLM.Provider` module to replace `Temporal.ProviderConfig`
 
 **Subtasks**:
-- [ ] Create directory `lib/temporal_cookbook_ui/llm/`
-- [ ] Create file `lib/temporal_cookbook_ui/llm/provider.ex`
-- [ ] Copy and refactor code from `temporal/provider_config.ex`
-- [ ] Update module name and documentation
-- [ ] Verify module compiles: `mix compile`
+- [x] Create directory `lib/temporal_cookbook_ui/llm/`
+- [x] Create file `lib/temporal_cookbook_ui/llm/provider.ex`
+- [x] Copy and refactor code from `temporal/provider_config.ex`
+- [x] Update module name and documentation
+- [x] Verify module compiles: `mix compile`
 
 **Files Created**:
 - `lib/temporal_cookbook_ui/llm/provider.ex`

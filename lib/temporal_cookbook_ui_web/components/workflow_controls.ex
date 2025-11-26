@@ -8,13 +8,13 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
   """
   use TemporalCookbookUiWeb, :live_component
 
-  alias TemporalCookbookUi.Temporal.ProviderConfig
+  alias TemporalCookbookUi.Llm.Provider
 
   @impl true
   def mount(socket) do
     {:ok,
      socket
-     |> assign(:provider, "openai")
+     |> assign(:provider, "ollama")
      |> assign(:prompt, "")
      |> assign(:temperature, 0.7)
      |> assign(:max_tokens, 500)}
@@ -35,18 +35,22 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
   end
 
   def handle_event("change_temperature", %{"temperature" => temp_str}, socket) do
-    temperature = case Float.parse(temp_str) do
-      {temp, _} when temp >= 0.0 and temp <= 2.0 -> temp
-      _ -> socket.assigns.temperature
-    end
+    temperature =
+      case Float.parse(temp_str) do
+        {temp, _} when temp >= 0.0 and temp <= 2.0 -> temp
+        _ -> socket.assigns.temperature
+      end
+
     {:noreply, assign(socket, :temperature, temperature)}
   end
 
   def handle_event("change_max_tokens", %{"max_tokens" => tokens_str}, socket) do
-    max_tokens = case Integer.parse(tokens_str) do
-      {tokens, _} when tokens > 0 -> tokens
-      _ -> socket.assigns.max_tokens
-    end
+    max_tokens =
+      case Integer.parse(tokens_str) do
+        {tokens, _} when tokens > 0 -> tokens
+        _ -> socket.assigns.max_tokens
+      end
+
     {:noreply, assign(socket, :max_tokens, max_tokens)}
   end
 
@@ -69,15 +73,15 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
             phx-target={@myself}
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            <%= for provider <- ProviderConfig.available_providers() do %>
+            <%= for provider <- Provider.available_providers() do %>
               <option value={provider} selected={@provider == provider}>
-                <%= String.capitalize(provider) %>
+                {String.capitalize(provider)}
               </option>
             <% end %>
           </select>
         </div>
-
-        <!-- Prompt Input -->
+        
+    <!-- Prompt Input -->
         <div class="mb-4">
           <label for="prompt" class="block text-sm font-medium text-gray-700 mb-2">
             Prompt
@@ -92,8 +96,8 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >{@prompt}</textarea>
         </div>
-
-        <!-- Temperature Slider -->
+        
+    <!-- Temperature Slider -->
         <div class="mb-4">
           <label for="temperature" class="block text-sm font-medium text-gray-700 mb-2">
             Temperature: <span class="font-normal text-gray-600">{@temperature}</span>
@@ -116,8 +120,8 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
             <span>2.0</span>
           </div>
         </div>
-
-        <!-- Max Tokens Input -->
+        
+    <!-- Max Tokens Input -->
         <div class="mb-6">
           <label for="max_tokens" class="block text-sm font-medium text-gray-700 mb-2">
             Max Tokens
@@ -134,8 +138,8 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-
-        <!-- Run Workflow Button -->
+        
+    <!-- Run Workflow Button -->
         <button
           type="button"
           phx-click="start_workflow"
@@ -158,6 +162,6 @@ defmodule TemporalCookbookUiWeb.Components.WorkflowControls do
   This is called by the parent LiveView when starting a workflow.
   """
   def model_for_provider(provider) do
-    ProviderConfig.model_for_provider(provider)
+    TemporalCookbookUi.Llm.Provider.model_for_provider(provider)
   end
 end
