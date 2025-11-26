@@ -31,37 +31,59 @@ This document provides a comprehensive guide for refactoring the Temporal Cookbo
 
 ## Target Architecture
 
-### OTP Layered Architecture ("Do Fun Things with Big, Loud Worker-Bees")
+### Domain-First Organization (Phoenix/Elixir Convention)
+
+**Note**: The OTP layered architecture (Data, Functional Core, Boundaries, Lifecycle, Workers) is a **mental model for organizing code within each domain**, not a directory structure. Phoenix and Elixir organize by **domains/contexts first**, with layers conceptually organized within each domain.
 
 ```
 lib/temporal_cookbook_ui/
-├── Data Structures (D)
-│   ├── cookbook/
-│   │   └── pattern.ex          # Pattern struct
-│   ├── temporal/
-│   │   ├── workflow.ex         # Workflow metadata struct
-│   │   └── execution.ex        # Execution result struct
-│   └── llm/
-│       └── provider.ex         # Provider configuration struct
+├── temporal/                    # Temporal integration domain (context)
+│   ├── client.ex               # Boundary layer - CLI interactions (side effects)
+│   ├── query.ex                # Functional core - Pure parsing logic
+│   └── workflow.ex             # Data structures - Workflow metadata (future)
 │
-├── Functional Core (F)
-│   ├── cookbook/
-│   │   └── pattern_selector.ex # Pure pattern selection logic
-│   ├── temporal/
-│   │   └── query.ex            # Pure CLI output parsing
-│   └── llm/
-│       └── model_selector.ex   # Pure provider mapping logic
+├── llm/                         # LLM provider domain (context)
+│   └── provider.ex             # Data + Functional core (simple domain)
 │
-├── Boundaries (B)
-│   ├── cookbook.ex             # Cookbook context API
-│   ├── temporal/
-│   │   └── client.ex           # Temporal CLI boundary
-│   └── llm.ex                  # LLM context API
+├── patterns/                    # Pattern catalog domain (future)
+│   ├── catalog.ex              # Boundary layer
+│   └── pattern.ex              # Data structures
 │
-└── Web Layer
-    └── live/
-        ├── pattern_detail_live.ex    # CRC: Construct, Reduce, Convert
-        └── execution_view_live.ex    # CRC: Construct, Reduce, Convert
+└── application.ex               # OTP supervisor tree
+
+lib/temporal_cookbook_ui_web/    # Web presentation layer
+├── live/                        # LiveView pages
+│   ├── pattern_detail_live.ex  # CRC: Construct, Reduce, Convert
+│   └── execution_view_live.ex  # CRC: Construct, Reduce, Convert
+└── components/                  # Reusable UI components
+    └── workflow_controls.ex
+```
+
+**Key Principle**:
+- **Domains are organized at the top level** (temporal/, llm/, patterns/)
+- **Layers exist within each domain** (not as top-level directories)
+- Each domain module contains its appropriate layers conceptually
+
+**Example of layers within a domain**:
+```elixir
+# Domain: Temporal
+defmodule TemporalCookbookUi.Temporal.Client do
+  # This is the BOUNDARY layer for Temporal domain
+  # - Contains side effects (System.cmd calls)
+  # - Delegates parsing to Query (functional core)
+end
+
+defmodule TemporalCookbookUi.Temporal.Query do
+  # This is the FUNCTIONAL CORE for Temporal domain
+  # - Pure functions (no side effects)
+  # - Parses CLI output into structured data
+end
+
+defmodule TemporalCookbookUi.Temporal.Workflow do
+  # This is the DATA layer for Temporal domain
+  # - Struct definitions
+  # - Type specifications
+end
 ```
 
 ### Phoenix LiveView CRC Pattern
