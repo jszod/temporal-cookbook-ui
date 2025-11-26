@@ -1,4 +1,4 @@
-defmodule TemporalCookbookUi.Llm.Provider do
+defmodule TemporalCookbookUi.LLM.Provider do
   @moduledoc """
    Provider configuration for mapping provider names to LiteLLM model strings.
 

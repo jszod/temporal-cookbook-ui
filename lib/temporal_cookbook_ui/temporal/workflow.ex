@@ -10,7 +10,7 @@ defmodule TemporalCookbookUi.Temporal.Workflow do
   that operate on a data structure are grouped with that data structure.
   """
 
-  alias TemporalCookbookUi.Llm.Provider
+  alias TemporalCookbookUi.LLM.Provider
 
   # ===== DATA LAYER =====
   # Struct definitions would go here when needed

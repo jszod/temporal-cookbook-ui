@@ -1,7 +1,7 @@
-defmodule TemporalCookbookUi.Llm.ProviderTest do
+defmodule TemporalCookbookUi.LLM.ProviderTest do
   use ExUnit.Case, async: true
 
-  alias TemporalCookbookUi.Llm.Provider
+  alias TemporalCookbookUi.LLM.Provider
 
   describe "model_for_provider/1" do
     test "returns model string for valid provider (lowercase)" do
