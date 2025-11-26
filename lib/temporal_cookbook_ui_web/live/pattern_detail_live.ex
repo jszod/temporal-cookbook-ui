@@ -3,7 +3,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
 
   alias TemporalCookbookUiWeb.Components.WorkflowControls
   alias TemporalCookbookUi.Temporal.Client
-  alias TemporalCookbookUi.Temporal.ProviderConfig
+  alias TemporalCookbookUi.Llm.Provider
 
   # Construct
   def mount(%{"pattern_id" => pattern_id}, _session, socket) do
@@ -17,7 +17,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
 
     # Map provider to model string using provider config
     provider = Map.get(params, "provider", "ollama")
-    model = ProviderConfig.model_for_provider(provider)
+    model = Provider.model_for_provider(provider)
     prompt = Map.get(params, "prompt", "")
     temperature = parse_float(params["temperature"])
     max_tokens = parse_integer(params["max_tokens"])

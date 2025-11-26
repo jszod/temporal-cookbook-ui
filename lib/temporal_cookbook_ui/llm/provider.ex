@@ -12,10 +12,14 @@ defmodule TemporalCookbookUi.Llm.Provider do
 
   @doc """
   Returns the model string for a given provider.
+
+  Returns `nil` if the provider is not found or if the input is not a string.
   """
-  def model_for_provider(provider) do
+  def model_for_provider(provider) when is_binary(provider) do
     Map.get(@provider_models, String.downcase(provider))
   end
+
+  def model_for_provider(_), do: nil
 
   @doc """
   Returns a list of all available provider names.
@@ -33,8 +37,12 @@ defmodule TemporalCookbookUi.Llm.Provider do
 
   @doc """
   Validates that a provider name is supported.
+
+  Returns `false` if the provider is not found or if the input is not a string.
   """
-  def valid_provider?(provider) do
+  def valid_provider?(provider) when is_binary(provider) do
     Map.has_key?(@provider_models, String.downcase(provider))
   end
+
+  def valid_provider?(_), do: false
 end

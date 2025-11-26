@@ -38,14 +38,14 @@
 **Description**: Update all files that import `ProviderConfig` to use new `LLM.Provider`
 
 **Subtasks**:
-- [ ] Update `lib/temporal_cookbook_ui_web/live/pattern_detail_live.ex`
+- [x] Update `lib/temporal_cookbook_ui_web/live/pattern_detail_live.ex`
   - Change: `alias TemporalCookbookUi.Temporal.ProviderConfig` → `alias TemporalCookbookUi.LLM.Provider`
   - Update function calls: `ProviderConfig.model_for_provider` → `Provider.model_for_provider`
-- [ ] Update `lib/temporal_cookbook_ui_web/components/workflow_controls.ex`
+- [x] Update `lib/temporal_cookbook_ui_web/components/workflow_controls.ex`
   - Change alias
   - Update function calls
-- [ ] Search for any other references: `rg "ProviderConfig" lib/`
-- [ ] Verify app compiles: `mix compile`
+- [x] Search for any other references: `rg "ProviderConfig" lib/`
+- [x] Verify app compiles: `mix compile`
 
 **Files Modified**:
 - `lib/temporal_cookbook_ui_web/live/pattern_detail_live.ex`
@@ -65,19 +65,19 @@
 **Description**: Create comprehensive unit tests for `LLM.Provider` module
 
 **Subtasks**:
-- [ ] Create file `test/temporal_cookbook_ui/llm/provider_test.exs`
-- [ ] Test `model_for_provider/1`:
+- [x] Create file `test/temporal_cookbook_ui/llm/provider_test.exs`
+- [x] Test `model_for_provider/1`:
   - Valid providers return correct models
   - Invalid providers return nil
   - Case-insensitive handling
-- [ ] Test `available_providers/0`:
+- [x] Test `available_providers/0`:
   - Returns list of all provider names
-- [ ] Test `valid_provider?/1`:
+- [x] Test `valid_provider?/1`:
   - Returns true for valid providers
   - Returns false for invalid input
   - Handles nil and non-string types
-- [ ] Run tests: `mix test test/temporal_cookbook_ui/llm/`
-- [ ] Verify 100% code coverage for this module
+- [x] Run tests: `mix test test/temporal_cookbook_ui/llm/`
+- [x] Verify 100% code coverage for this module
 
 **Files Created**:
 - `test/temporal_cookbook_ui/llm/provider_test.exs`
@@ -96,15 +96,15 @@
 **Description**: Remove old `ProviderConfig` module and verify entire app works
 
 **Subtasks**:
-- [ ] Delete file `lib/temporal_cookbook_ui/temporal/provider_config.ex`
-- [ ] Run full test suite: `mix test`
-- [ ] Verify all tests pass
-- [ ] Start dev server: `mix phx.server`
+- [x] Delete file `lib/temporal_cookbook_ui/temporal/provider_config.ex`
+- [x] Run full test suite: `mix test`
+- [x] Verify all tests pass
+- [x] Start dev server: `mix phx.server`
 - [ ] Manual smoke test:
   - Navigate to pattern detail page
   - Verify provider dropdown loads
   - Verify workflow can be started
-- [ ] Commit changes with descriptive message
+- [x] Commit changes with descriptive message
 
 **Files Deleted**:
 - `lib/temporal_cookbook_ui/temporal/provider_config.ex`
