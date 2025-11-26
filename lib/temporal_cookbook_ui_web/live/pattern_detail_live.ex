@@ -4,6 +4,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
   alias TemporalCookbookUiWeb.Components.WorkflowControls
   alias TemporalCookbookUi.Temporal.Client
   alias TemporalCookbookUi.Llm.Provider
+  alias TemporalCookbookUiWeb.Live.Helpers
 
   # Construct
   def mount(%{"pattern_id" => pattern_id}, _session, socket) do
@@ -11,16 +12,40 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
     {:ok, assign(socket, pattern: pattern)}
   end
 
-  # Reducers
+  # ===== REDUCERS =====
+  # Reducers transform state based on events.
+  # They should be thin and delegate to converters for data transformation.
   def handle_event("start_workflow", params, socket) do
-    pattern_id = socket.assigns.pattern.id
+    # Build workflow request using converter
+    workflow_request = build_workflow_request(socket.assigns.pattern.id, params)
 
+    # Execute workflow via boundary layer (side effect)
+    case Client.start_workflow(
+           "litellm_workflow",
+           workflow_request.workflow_id,
+           workflow_request.input
+         ) do
+      {:ok, run_id} ->
+        # Navigate to execution view (converter)
+        {:noreply, navigate_to_execution(socket, workflow_request, run_id)}
+
+      {:error, reason} ->
+        # Show error to user (converter)
+        {:noreply, show_error(socket, reason)}
+    end
+  end
+
+  # ===== CONVERTERS =====
+  # Converters transform data for presentation or navigation.
+  # They are pure functions (no side effects) that format data.
+
+  defp build_workflow_request(pattern_id, params) do
     # Map provider to model string using provider config
     provider = Map.get(params, "provider", "ollama")
     model = Provider.model_for_provider(provider)
     prompt = Map.get(params, "prompt", "")
-    temperature = parse_float(params["temperature"])
-    max_tokens = parse_integer(params["max_tokens"])
+    temperature = Helpers.parse_float(params["temperature"])
+    max_tokens = Helpers.parse_integer(params["max_tokens"])
 
     # Build workflow input matching Python workflow expectations
     workflow_input =
@@ -33,54 +58,38 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
       |> Enum.reject(fn {_k, v} -> is_nil(v) end)
       |> Map.new()
 
+    %{
+      pattern_id: pattern_id,
+      workflow_id: generate_workflow_id(),
+      input: workflow_input
+    }
+  end
+
+  defp generate_workflow_id do
     # Generate unique workflow ID
-    workflow_id = "litellm-#{System.system_time(:second)}-#{:rand.uniform(9999)}"
-
-    # Start workflow via Temporal client
-    case Client.start_workflow("litellm_workflow", workflow_id, workflow_input) do
-      {:ok, run_id} ->
-        # Navigate to execution view with workflow_id and run_id
-        {:noreply,
-         push_navigate(
-           socket,
-           to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}?run_id=#{run_id}"
-         )}
-
-      {:error, reason} ->
-        # Show error to user
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to start workflow: #{inspect(reason)}")
-         |> assign(:error, reason)}
-    end
+    "litellm-#{System.system_time(:second)}-#{:rand.uniform(9999)}"
   end
 
-  # Helper functions
-  defp parse_float(nil), do: nil
+  defp navigate_to_execution(socket, workflow_request, run_id) do
+    # Navigate to execution view with workflow_id and run_id
+    pattern_id = workflow_request.pattern_id
+    workflow_id = workflow_request.workflow_id
 
-  defp parse_float(str) when is_binary(str) do
-    case Float.parse(str) do
-      {float, _} -> float
-      :error -> nil
-    end
+    push_navigate(
+      socket,
+      to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}?run_id=#{run_id}"
+    )
   end
 
-  defp parse_float(float) when is_float(float), do: float
-  defp parse_float(_), do: nil
-
-  defp parse_integer(nil), do: nil
-
-  defp parse_integer(str) when is_binary(str) do
-    case Integer.parse(str) do
-      {int, _} -> int
-      :error -> nil
-    end
+  defp show_error(socket, reason) do
+    # Show error to user via flash message and socket assign
+    socket
+    |> put_flash(:error, "Failed to start workflow: #{inspect(reason)}")
+    |> assign(:error, reason)
   end
 
-  defp parse_integer(int) when is_integer(int), do: int
-  defp parse_integer(_), do: nil
-
-  # Convertor
+  # ===== RENDER (Final Converter) =====
+  # The render function is the final converter that formats all data for display.
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

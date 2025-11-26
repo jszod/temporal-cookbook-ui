@@ -3,33 +3,67 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
 
   alias TemporalCookbookUi.Temporal.Client
 
-  # Construct
+  # ===== CONSTRUCTOR =====
+  # Constructors initialize state from params and session.
   def mount(params, _session, socket) do
     pattern_id = params["pattern_id"]
     workflow_id = params["workflow_id"]
 
-    # Get run_id from query params (passed in URL like ?run_id=xxx)
-    run_id = get_run_id_from_uri(socket)
+    # Extract run_id from URI query params (converter)
+    run_id = extract_run_id(socket)
 
+    # Initialize socket with default state
+    socket =
+      assign(socket,
+        pattern_id: pattern_id,
+        workflow_id: workflow_id,
+        run_id: run_id,
+        status: "RUNNING",
+        result: nil,
+        error: nil,
+        loading: true
+      )
+
+    # Start polling if connected
     if connected?(socket) do
-      # Start polling for workflow status
       schedule_poll()
     end
 
-    {:ok,
-     assign(socket,
-       pattern_id: pattern_id,
-       workflow_id: workflow_id,
-       run_id: run_id,
-       status: "RUNNING",
-       result: nil,
-       error: nil,
-       loading: true
-     )}
+    {:ok, socket}
   end
 
-  defp get_run_id_from_uri(socket) do
-    # Get run_id from URI query params
+  # ===== REDUCERS =====
+  # Reducers transform state based on events.
+  # They should be thin and delegate to converters for data transformation.
+  def handle_info(:poll_workflow, socket) do
+    # Fetch workflow status using converter
+    case fetch_workflow_status(socket) do
+      {:ok, :completed, result} ->
+        # Workflow completed, mark as completed (converter)
+        {:noreply, mark_completed(socket, result)}
+
+      {:ok, :failed} ->
+        # Workflow failed, mark as failed (converter)
+        {:noreply, mark_failed(socket)}
+
+      {:ok, :running} ->
+        # Still running, continue polling
+        schedule_poll()
+        {:noreply, assign(socket, status: "RUNNING")}
+
+      {:ok, :unknown} ->
+        # Unknown status, continue polling
+        schedule_poll()
+        {:noreply, socket}
+    end
+  end
+
+  # ===== CONVERTERS =====
+  # Converters transform data for presentation or state updates.
+  # They are pure functions (no side effects) that format data.
+
+  defp extract_run_id(socket) do
+    # Extract run_id from URI query params
     case get_in(socket.assigns, [:uri, :query]) do
       nil ->
         nil
@@ -44,9 +78,8 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
     end
   end
 
-  # Reducers
-  def handle_info(:poll_workflow, socket) do
-    # Poll workflow status using Client boundary layer
+  defp fetch_workflow_status(socket) do
+    # Fetch workflow status from boundary layer
     workflow_id = socket.assigns.workflow_id
     run_id = socket.assigns.run_id
 
@@ -55,53 +88,57 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
     case Client.describe_workflow(workflow_id, opts) do
       {:ok, %{status: "COMPLETED"}} ->
         # Workflow completed, fetch result
-        case Client.get_workflow_result(workflow_id, opts) do
-          {:ok, result} ->
-            # Workflow completed with result, stop polling
-            {:noreply,
-             assign(socket,
-               status: "COMPLETED",
-               result: result,
-               loading: false
-             )}
-
-          {:error, _reason} ->
-            # Workflow completed but couldn't get result, stop polling anyway
-            {:noreply,
-             assign(socket,
-               status: "COMPLETED",
-               result: %{},
-               loading: false
-             )}
-        end
+        result = fetch_result(workflow_id, opts)
+        {:ok, :completed, result}
 
       {:ok, %{status: "FAILED"}} ->
-        # Workflow failed, stop polling
-        {:noreply,
-         assign(socket,
-           status: "FAILED",
-           error: "Workflow execution failed",
-           loading: false
-         )}
+        {:ok, :failed}
 
       {:ok, %{status: "RUNNING"}} ->
-        # Still running, poll again
-        schedule_poll()
-        {:noreply, assign(socket, status: "RUNNING")}
+        {:ok, :running}
 
-      {:ok, %{status: status}} ->
-        # Unknown status, continue polling
-        schedule_poll()
-        {:noreply, assign(socket, status: status)}
+      {:ok, %{status: _}} ->
+        {:ok, :unknown}
 
       {:error, _reason} ->
-        # Error describing workflow, continue polling (workflow might not be ready yet)
-        schedule_poll()
-        {:noreply, assign(socket, status: "RUNNING")}
+        # Error describing workflow, assume still running
+        {:ok, :running}
     end
   end
 
-  # Convertor
+  defp fetch_result(workflow_id, opts) do
+    # Fetch workflow result from boundary layer
+    case Client.get_workflow_result(workflow_id, opts) do
+      {:ok, result} -> result
+      {:error, _reason} -> %{}
+    end
+  end
+
+  defp mark_completed(socket, result) do
+    # Mark workflow as completed and update socket state
+    assign(socket,
+      status: "COMPLETED",
+      result: result,
+      loading: false
+    )
+  end
+
+  defp mark_failed(socket) do
+    # Mark workflow as failed and update socket state
+    assign(socket,
+      status: "FAILED",
+      error: "Workflow execution failed",
+      loading: false
+    )
+  end
+
+  defp schedule_poll do
+    # Schedule next poll (side effect, but isolated)
+    Process.send_after(self(), :poll_workflow, 2000)
+  end
+
+  # ===== RENDER (Final Converter) =====
+  # The render function is the final converter that formats all data for display.
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -254,11 +291,5 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
       </div>
     </div>
     """
-  end
-
-  # Helper functions
-  defp schedule_poll do
-    # Poll every 2 seconds
-    Process.send_after(self(), :poll_workflow, 2000)
   end
 end
