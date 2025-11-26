@@ -1,0 +1,14 @@
+[project]
+name = "python"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["temporalio", "litellm"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+    "pytest-asyncio>=0.25.0",
+]

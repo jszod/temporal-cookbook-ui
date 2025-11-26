@@ -1,6 +1,10 @@
 defmodule TemporalCookbookUiWeb.PatternDetailLive do
   use TemporalCookbookUiWeb, :live_view
 
+  alias TemporalCookbookUiWeb.Components.WorkflowControls
+  alias TemporalCookbookUi.Temporal.Client
+  alias TemporalCookbookUi.Temporal.ProviderConfig
+
   # Construct
   def mount(%{"pattern_id" => pattern_id}, _session, socket) do
     pattern = get_pattern_by_id(pattern_id)
@@ -8,13 +12,73 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
   end
 
   # Reducers
-  def handle_event("start_workflow", _params, socket) do
+  def handle_event("start_workflow", params, socket) do
     pattern_id = socket.assigns.pattern.id
-    # Generate mock workflow ID for Feature 001
-    workflow_id = "mock-wf-#{:rand.uniform(9999)}"
 
-    {:noreply, push_navigate(socket, to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}")}
+    # Map provider to model string using provider config
+    provider = Map.get(params, "provider", "openai")
+    model = ProviderConfig.model_for_provider(provider)
+    prompt = Map.get(params, "prompt", "")
+    temperature = parse_float(params["temperature"])
+    max_tokens = parse_integer(params["max_tokens"])
+
+    # Build workflow input matching Python workflow expectations
+    workflow_input =
+      %{
+        "model" => model,
+        "prompt" => prompt,
+        "temperature" => temperature,
+        "max_tokens" => max_tokens
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    # Generate unique workflow ID
+    workflow_id = "litellm-#{System.system_time(:second)}-#{:rand.uniform(9999)}"
+
+    # Start workflow via Temporal client
+    case Client.start_workflow("litellm_workflow", workflow_id, workflow_input) do
+      {:ok, run_id} ->
+        # Navigate to execution view with workflow_id and run_id
+        {:noreply,
+         push_navigate(
+           socket,
+           to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}?run_id=#{run_id}"
+         )}
+
+      {:error, reason} ->
+        # Show error to user
+        {:noreply,
+         socket
+         |> put_flash(:error, "Failed to start workflow: #{inspect(reason)}")
+         |> assign(:error, reason)}
+    end
   end
+
+  # Helper functions
+  defp parse_float(nil), do: nil
+
+  defp parse_float(str) when is_binary(str) do
+    case Float.parse(str) do
+      {float, _} -> float
+      :error -> nil
+    end
+  end
+
+  defp parse_float(float) when is_float(float), do: float
+  defp parse_float(_), do: nil
+
+  defp parse_integer(nil), do: nil
+
+  defp parse_integer(str) when is_binary(str) do
+    case Integer.parse(str) do
+      {int, _} -> int
+      :error -> nil
+    end
+  end
+
+  defp parse_integer(int) when is_integer(int), do: int
+  defp parse_integer(_), do: nil
 
   # Convertor
   def render(assigns) do
@@ -35,18 +99,22 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
         <% end %>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-6 mt-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Pattern Details</h2>
-        <p class="text-gray-600">This is a placeholder for pattern-specific content.</p>
-
-        <div class="mt-6">
-          <button
-            phx-click="start_workflow"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Start Workflow
-          </button>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- Left Panel: Pattern Details -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Pattern Details</h2>
+          <p class="text-gray-600">This is a placeholder for pattern-specific content.</p>
         </div>
+        
+    <!-- Right Panel: Workflow Controls -->
+        <%= if @pattern.id == "1" do %>
+          <.live_component module={WorkflowControls} id="workflow-controls" />
+        <% else %>
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Workflow Controls</h2>
+            <p class="text-gray-600">Workflow controls for this pattern coming soon.</p>
+          </div>
+        <% end %>
       </div>
     </div>
     """
