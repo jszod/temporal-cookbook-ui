@@ -3,8 +3,7 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
 
   alias TemporalCookbookUiWeb.Components.WorkflowControls
   alias TemporalCookbookUi.Temporal.Client
-  alias TemporalCookbookUi.Llm.Provider
-  alias TemporalCookbookUiWeb.Live.Helpers
+  alias TemporalCookbookUi.Temporal.Workflow
 
   # Construct
   def mount(%{"pattern_id" => pattern_id}, _session, socket) do
@@ -16,8 +15,8 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
   # Reducers transform state based on events.
   # They should be thin and delegate to converters for data transformation.
   def handle_event("start_workflow", params, socket) do
-    # Build workflow request using converter
-    workflow_request = build_workflow_request(socket.assigns.pattern.id, params)
+    # Build workflow request using functional core (Workflow module)
+    workflow_request = Workflow.build_request(socket.assigns.pattern.id, params)
 
     # Execute workflow via boundary layer (side effect)
     case Client.start_workflow(
@@ -38,37 +37,6 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
   # ===== CONVERTERS =====
   # Converters transform data for presentation or navigation.
   # They are pure functions (no side effects) that format data.
-
-  defp build_workflow_request(pattern_id, params) do
-    # Map provider to model string using provider config
-    provider = Map.get(params, "provider", "ollama")
-    model = Provider.model_for_provider(provider)
-    prompt = Map.get(params, "prompt", "")
-    temperature = Helpers.parse_float(params["temperature"])
-    max_tokens = Helpers.parse_integer(params["max_tokens"])
-
-    # Build workflow input matching Python workflow expectations
-    workflow_input =
-      %{
-        "model" => model,
-        "prompt" => prompt,
-        "temperature" => temperature,
-        "max_tokens" => max_tokens
-      }
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-      |> Map.new()
-
-    %{
-      pattern_id: pattern_id,
-      workflow_id: generate_workflow_id(),
-      input: workflow_input
-    }
-  end
-
-  defp generate_workflow_id do
-    # Generate unique workflow ID
-    "litellm-#{System.system_time(:second)}-#{:rand.uniform(9999)}"
-  end
 
   defp navigate_to_execution(socket, workflow_request, run_id) do
     # Navigate to execution view with workflow_id and run_id

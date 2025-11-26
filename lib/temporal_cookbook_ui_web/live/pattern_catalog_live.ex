@@ -1,9 +1,11 @@
 defmodule TemporalCookbookUiWeb.PatternCatalogLive do
   use TemporalCookbookUiWeb, :live_view
 
+  alias TemporalCookbookUi.Patterns.Pattern
+
   # Construct
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, patterns: mock_patterns())}
+    {:ok, assign(socket, patterns: Pattern.list_all())}
   end
 
   # Reducers
@@ -36,16 +38,16 @@ defmodule TemporalCookbookUiWeb.PatternCatalogLive do
     """
   end
 
-  defp mock_patterns do
-    [
-      %{
-        id: 1,
-        name: "Hello World Litellm",
-        description: "Use Litellm to provide AI capabilities within your Temporal workflows.",
-        complexity: "Easy"
-      },
-      %{id: 2, name: "Pattern B", description: "Description for Pattern B"},
-      %{id: 3, name: "Pattern C", description: "Description for Pattern C"}
-    ]
-  end
+  # defp mock_patterns do
+  #   [
+  #     %{
+  #       id: 1,
+  #       name: "Hello World Litellm",
+  #       description: "Use Litellm to provide AI capabilities within your Temporal workflows.",
+  #       complexity: "Easy"
+  #     },
+  #     %{id: 2, name: "Pattern B", description: "Description for Pattern B"},
+  #     %{id: 3, name: "Pattern C", description: "Description for Pattern C"}
+  #   ]
+  # end
 end

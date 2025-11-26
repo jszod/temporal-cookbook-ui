@@ -82,4 +82,3 @@ defmodule TemporalCookbookUiWeb.Live.HelpersTest do
     end
   end
 end
-
