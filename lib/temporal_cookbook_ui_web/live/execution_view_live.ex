@@ -1,6 +1,8 @@
 defmodule TemporalCookbookUiWeb.ExecutionViewLive do
   use TemporalCookbookUiWeb, :live_view
 
+  alias TemporalCookbookUi.Temporal.Client
+
   # Construct
   def mount(params, _session, socket) do
     pattern_id = params["pattern_id"]
@@ -44,16 +46,34 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
 
   # Reducers
   def handle_info(:poll_workflow, socket) do
-    # Poll workflow status
-    case get_workflow_status(socket.assigns.workflow_id, socket.assigns.run_id) do
-      {:ok, %{status: "COMPLETED", result: result}} ->
-        # Workflow completed, stop polling
-        {:noreply,
-         assign(socket,
-           status: "COMPLETED",
-           result: result,
-           loading: false
-         )}
+    # Poll workflow status using Client boundary layer
+    workflow_id = socket.assigns.workflow_id
+    run_id = socket.assigns.run_id
+
+    opts = if run_id, do: [run_id: run_id], else: []
+
+    case Client.describe_workflow(workflow_id, opts) do
+      {:ok, %{status: "COMPLETED"}} ->
+        # Workflow completed, fetch result
+        case Client.get_workflow_result(workflow_id, opts) do
+          {:ok, result} ->
+            # Workflow completed with result, stop polling
+            {:noreply,
+             assign(socket,
+               status: "COMPLETED",
+               result: result,
+               loading: false
+             )}
+
+          {:error, _reason} ->
+            # Workflow completed but couldn't get result, stop polling anyway
+            {:noreply,
+             assign(socket,
+               status: "COMPLETED",
+               result: %{},
+               loading: false
+             )}
+        end
 
       {:ok, %{status: "FAILED"}} ->
         # Workflow failed, stop polling
@@ -73,6 +93,11 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
         # Unknown status, continue polling
         schedule_poll()
         {:noreply, assign(socket, status: status)}
+
+      {:error, _reason} ->
+        # Error describing workflow, continue polling (workflow might not be ready yet)
+        schedule_poll()
+        {:noreply, assign(socket, status: "RUNNING")}
     end
   end
 
@@ -235,108 +260,5 @@ defmodule TemporalCookbookUiWeb.ExecutionViewLive do
   defp schedule_poll do
     # Poll every 2 seconds
     Process.send_after(self(), :poll_workflow, 2000)
-  end
-
-  defp get_workflow_status(workflow_id, run_id) do
-    # Use Temporal CLI to get workflow status
-    # temporal workflow describe --workflow-id <id>
-    cmd_args = [
-      "workflow",
-      "describe",
-      "--workflow-id",
-      workflow_id
-    ]
-
-    cmd_args = if run_id, do: cmd_args ++ ["--run-id", run_id], else: cmd_args
-
-    case System.cmd("temporal", cmd_args, stderr_to_stdout: true) do
-      {output, 0} ->
-        # Parse status from output
-        status = parse_workflow_status(output)
-
-        # If completed, try to get result
-        result =
-          if status == "COMPLETED" do
-            case get_workflow_result(workflow_id, run_id) do
-              {:ok, r} -> r
-              _ -> nil
-            end
-          else
-            nil
-          end
-
-        {:ok, %{status: status, result: result}}
-
-      {_output, _exit_code} ->
-        # If describe fails, workflow might not exist or be accessible
-        # Default to running state
-        {:ok, %{status: "RUNNING", result: nil}}
-    end
-  end
-
-  defp parse_workflow_status(output) do
-    cond do
-      String.contains?(output, "Status: COMPLETED") or String.contains?(output, "COMPLETED") ->
-        "COMPLETED"
-
-      String.contains?(output, "Status: FAILED") or String.contains?(output, "FAILED") ->
-        "FAILED"
-
-      String.contains?(output, "Status: RUNNING") or String.contains?(output, "RUNNING") ->
-        "RUNNING"
-
-      true ->
-        # Default to running if we can't parse
-        "RUNNING"
-    end
-  end
-
-  defp get_workflow_result(workflow_id, run_id) do
-    # Use Temporal CLI to get workflow result
-    # temporal workflow show --workflow-id <id> --run-id <run-id>
-    cmd_args = [
-      "workflow",
-      "show",
-      "--workflow-id",
-      workflow_id
-    ]
-
-    cmd_args = if run_id, do: cmd_args ++ ["--run-id", run_id], else: cmd_args
-
-    case System.cmd("temporal", cmd_args, stderr_to_stdout: true) do
-      {output, 0} ->
-        # Try to extract result from output
-        # Temporal CLI shows result in various formats
-        result = extract_result_from_cli_output(output)
-        {:ok, result}
-
-      {_output, _exit_code} ->
-        {:error, :workflow_not_completed}
-    end
-  end
-
-  defp extract_result_from_cli_output(output) do
-    # Try to find JSON result in output
-    # Look for patterns like "Result: {...}" or JSON blocks
-    case Regex.run(~r/Result[:\s]+(\{.*\})/s, output) do
-      [_, json_str] ->
-        case Jason.decode(json_str) do
-          {:ok, result} -> result
-          _ -> %{}
-        end
-
-      _ ->
-        # Try to find any JSON object in output
-        case Regex.run(~r/\{[\s\S]*\}/, output) do
-          [json_str] ->
-            case Jason.decode(json_str) do
-              {:ok, result} -> result
-              _ -> %{}
-            end
-
-          _ ->
-            %{}
-        end
-    end
   end
 end

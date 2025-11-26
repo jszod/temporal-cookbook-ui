@@ -2,15 +2,20 @@ defmodule TemporalCookbookUi.Temporal.Client do
   @moduledoc """
   Temporal gRPC client wrapper for starting workflows and querying execution state.
 
-  This module provides a high-level interface to Temporal's gRPC API for:
+  This module provides a high-level interface to Temporal's CLI (and future gRPC API) for:
   - Starting workflow executions
-  - Getting workflow history
-  - Querying workflow state
+  - Describing workflow state
   - Getting workflow results
+  - Getting workflow history
 
-  Note: This is currently a placeholder implementation. For production use,
+  This module handles all side effects (System.cmd calls) and delegates pure parsing
+  logic to the `Temporal.Query` module.
+
+  Note: This currently uses Temporal CLI. For production use,
   integrate with Temporal's gRPC API using a proper client library.
   """
+
+  alias TemporalCookbookUi.Temporal.Query
 
   @default_namespace "default"
   @default_task_queue "temporal-cookbook-examples"
@@ -125,43 +130,141 @@ defmodule TemporalCookbookUi.Temporal.Client do
   end
 
   @doc """
-  Queries workflow state.
+  Describes workflow execution state.
+
+  Uses `temporal workflow describe` to get the current status of a workflow.
 
   ## Parameters
   - `workflow_id`: The workflow ID
-  - `run_id`: The workflow run ID (optional)
+  - `opts`: Optional keyword list with:
+    - `:run_id` - The workflow run ID (optional)
+    - `:namespace` - Temporal namespace (default: "default")
 
   ## Returns
   - `{:ok, state}` on success with state map containing:
-    - `:status` - Workflow status ("RUNNING", "COMPLETED", "FAILED", etc.)
-    - `:result` - Workflow result if completed
+    - `:status` - Workflow status ("RUNNING", "COMPLETED", "FAILED", "UNKNOWN")
   - `{:error, reason}` on failure
+
+  ## Examples
+
+      iex> Client.describe_workflow("wf-123", run_id: "run-456")
+      {:ok, %{status: "COMPLETED"}}
+
+      iex> Client.describe_workflow("wf-123")
+      {:ok, %{status: "RUNNING"}}
   """
-  def query_workflow_state(_workflow_id, _run_id \\ nil) do
-    # TODO: Implement actual Temporal gRPC call
-    # For now, return mock state
-    {:ok, %{status: "RUNNING"}}
+  def describe_workflow(workflow_id, opts \\ []) do
+    require Logger
+
+    run_id = Keyword.get(opts, :run_id)
+    namespace = Keyword.get(opts, :namespace, @default_namespace)
+
+    Logger.info("Describing workflow: #{workflow_id}, run_id: #{inspect(run_id)}")
+
+    cmd_args = build_describe_args(workflow_id, run_id, namespace)
+
+    case System.cmd("temporal", cmd_args, stderr_to_stdout: true) do
+      {output, 0} ->
+        status = Query.parse_status(output)
+        Logger.info("Workflow #{workflow_id} status: #{status}")
+        {:ok, %{status: status}}
+
+      {output, exit_code} ->
+        error_msg = "Failed to describe workflow (exit code #{exit_code}): #{output}"
+        Logger.error(error_msg)
+        {:error, {:temporal_cli_error, exit_code, output}}
+    end
   end
 
   @doc """
   Gets workflow execution result.
 
+  Uses `temporal workflow show` to get the result of a completed workflow.
+
   ## Parameters
   - `workflow_id`: The workflow ID
-  - `run_id`: The workflow run ID (optional)
+  - `opts`: Optional keyword list with:
+    - `:run_id` - The workflow run ID (optional)
+    - `:namespace` - Temporal namespace (default: "default")
 
   ## Returns
-  - `{:ok, result}` on success (when workflow is completed)
-  - `{:error, :workflow_not_completed}` if workflow is still running
-  - `{:error, reason}` on failure
+  - `{:ok, result}` on success with parsed JSON result as a map
+  - `{:ok, %{}}` if workflow completed but no result found
+  - `{:error, reason}` on failure (e.g., workflow not found, JSON parse error)
+
+  ## Examples
+
+      iex> Client.get_workflow_result("wf-123", run_id: "run-456")
+      {:ok, %{"text" => "Generated response", "tokens" => 100}}
+
+      iex> Client.get_workflow_result("wf-123")
+      {:ok, %{}}
   """
-  def get_workflow_result(_workflow_id, _run_id \\ nil) do
-    # TODO: Implement actual Temporal gRPC call
-    # For now, return error indicating workflow not completed
-    {:error, :workflow_not_completed}
+  def get_workflow_result(workflow_id, opts \\ []) do
+    require Logger
+
+    run_id = Keyword.get(opts, :run_id)
+    namespace = Keyword.get(opts, :namespace, @default_namespace)
+
+    Logger.info("Getting workflow result: #{workflow_id}, run_id: #{inspect(run_id)}")
+
+    cmd_args = build_show_args(workflow_id, run_id, namespace)
+
+    case System.cmd("temporal", cmd_args, stderr_to_stdout: true) do
+      {output, 0} ->
+        case Query.extract_result(output) do
+          {:ok, result} ->
+            Logger.info("Successfully extracted result for workflow #{workflow_id}")
+            {:ok, result}
+
+          {:error, reason} ->
+            error_msg = "Failed to parse workflow result: #{inspect(reason)}"
+            Logger.error(error_msg)
+            {:error, {:json_parse_error, reason}}
+        end
+
+      {output, exit_code} ->
+        error_msg = "Failed to get workflow result (exit code #{exit_code}): #{output}"
+        Logger.error(error_msg)
+        {:error, {:temporal_cli_error, exit_code, output}}
+    end
   end
 
   # Private helper functions
+
+  defp build_describe_args(workflow_id, run_id, namespace) do
+    base_args = [
+      "workflow",
+      "describe",
+      "--workflow-id",
+      workflow_id,
+      "--namespace",
+      namespace
+    ]
+
+    if run_id do
+      base_args ++ ["--run-id", run_id]
+    else
+      base_args
+    end
+  end
+
+  defp build_show_args(workflow_id, run_id, namespace) do
+    base_args = [
+      "workflow",
+      "show",
+      "--workflow-id",
+      workflow_id,
+      "--namespace",
+      namespace
+    ]
+
+    if run_id do
+      base_args ++ ["--run-id", run_id]
+    else
+      base_args
+    end
+  end
 
   defp generate_run_id do
     # Generate a realistic Temporal run_id format
