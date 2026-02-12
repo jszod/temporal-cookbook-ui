@@ -1,7 +1,7 @@
 # Development Plan - Temporal AI Cookbook UI
 
-**Last Updated**: 2025-11-24
-**Current Phase**: MVP Development (Feature 1 Complete)
+**Last Updated**: 2025-11-25 (Feature 2 in progress - core implementation complete)
+**Current Phase**: MVP Development (Feature 1 Complete, Feature 2 In Progress - 60%)
 **Project Focus**: Interactive playground for Temporal AI Cookbook patterns
 **Timeline**: 6-8 weeks to MVP
 
@@ -49,21 +49,34 @@ Create low-fidelity wireframes and Phoenix LiveView foundation.
 
 ---
 
-### Feature 2: LiteLLM Pattern - Complete Vertical Slice
+### Feature 2: LiteLLM Pattern - Complete Vertical Slice 🔄 IN PROGRESS (60%)
 **GitHub Issue**: #2 | **Priority**: High | **Estimate**: 5 days
 **PRD**: `docs/features/feature-002-litellm-pattern.md`
+**Related ADR**: `docs/decisions/001-shared-worker-architecture.md`
+**Status**: Core implementation complete, testing in progress
 
 First complete pattern implementation - LiteLLM with multi-provider support.
 
 **Key Deliverables**:
 - Python worker implementing LiteLLM pattern (from Temporal AI Cookbook)
+- **Shared worker architecture**: Single worker registering all 7 cookbook workflows (Temporal-standard pattern)
 - Phoenix UI: pattern detail page, prompt input form, model selector
 - Temporal client integration: start workflow, retrieve history, display events
 - Real-time visualization: timeline showing LLM activity execution
 - Multi-provider support: OpenAI, Anthropic, Groq, local Ollama
 - Interactive controls: model dropdown, prompt textarea, temperature/max_tokens sliders
+- Infrastructure status monitoring: UI shows Temporal Server status and worker count (supports multiple workers, production-realistic)
 
-**Exit Criteria**: User can run LiteLLM workflow with any provider, see real-time execution, view LLM responses
+**Exit Criteria**: User can run LiteLLM workflow with any provider, see real-time execution, view LLM responses. Worker runs as single process (production-realistic architecture).
+
+**Current Progress (2025-11-25)**:
+- ✅ Python worker implemented and running
+- ✅ LiteLLM workflow and activity complete
+- ✅ UI components functional (WorkflowControls, ExecutionViewLive)
+- ✅ Temporal client integration (CLI bridge)
+- ✅ Ollama support configured and tested
+- 🔄 Testing with all providers (Ollama ✅, others pending)
+- ⏳ Infrastructure status component (Temporal Server + Worker count) (task 4.0)
 
 ---
 
@@ -103,17 +116,19 @@ Implement second AI pattern to validate component reusability.
 ### Feature 5: Worker Process Management
 **GitHub Issue**: #5 | **Priority**: High | **Estimate**: 2 days
 **PRD**: `docs/features/feature-005-worker-management.md`
+**Related ADR**: `docs/decisions/001-shared-worker-architecture.md`
 
-Reliable Python worker supervision and health monitoring.
+Worker health monitoring and optional supervision. **Note**: Workers are infrastructure components, not UI-controlled (see ADR 001).
 
 **Key Deliverables**:
-- OTP supervision tree for Python worker processes
-- Worker auto-start when Phoenix starts
-- Worker auto-restart on failure
 - Health check mechanism (heartbeat or task queue polling)
-- UI status indicator: worker online/offline badge
+- UI status indicator: worker online/offline badge (already implemented in Feature 2)
+- **Optional**: OTP supervision tree for Python worker processes (convenience feature, not required for MVP)
+- **Optional**: Worker auto-start when Phoenix starts (if OTP supervision implemented)
+- **Optional**: Worker auto-restart on failure (if OTP supervision implemented)
+- Demo instructions in UI for manual worker control (primary approach)
 
-**Exit Criteria**: Workers start automatically, restart on crash, health status visible in navbar
+**Exit Criteria**: Worker health status visible in navbar. Manual worker control documented. Optional OTP supervision available if implemented.
 
 ---
 
@@ -185,11 +200,13 @@ Visualize retry behavior and graceful error handling.
 - Graceful handling when provider credentials missing
 
 ### Risk 2: Worker Process Complexity
-**Impact**: Medium | **Probability**: Medium
+**Impact**: Low | **Probability**: Low
 **Risk**: Python worker supervision from Elixir may be fragile
 **Mitigation**:
-- Start with simple `System.cmd` approach
-- Document manual worker startup as fallback
+- **Architecture Decision**: Workers are infrastructure, not app-controlled (ADR 001)
+- Primary approach: Manual terminal control (documented in UI)
+- Optional OTP supervision for convenience (Feature 5)
+- Document manual worker startup as standard approach
 - Consider Docker Compose for production deployment
 
 ### Risk 3: LiteLLM Provider Compatibility
@@ -210,10 +227,14 @@ Visualize retry behavior and graceful error handling.
 5. [x] Create GitHub issues #1-#7
 6. [x] Feature 1: Phoenix project initialized, 3 LiveView modules, navigation working
 
-### Next Session
-1. [ ] Start Feature 2: LiteLLM Pattern implementation
-2. [ ] Create Feature 2 PRD
-3. [ ] Set up Temporal client integration
+### Current Status
+1. [x] Create Feature 2 PRD and ADR (shared worker architecture)
+2. [x] Start Feature 2: LiteLLM Pattern implementation
+3. [x] Set up Temporal client integration
+4. [x] Core workflow execution pipeline complete
+5. [ ] Complete provider testing (Ollama ✅, OpenAI/Anthropic/Groq pending)
+6. [ ] Worker status component
+7. [ ] Final testing and documentation
 
 ---
 

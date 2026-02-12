@@ -1,22 +1,63 @@
 defmodule TemporalCookbookUiWeb.PatternDetailLive do
   use TemporalCookbookUiWeb, :live_view
 
+  alias TemporalCookbookUiWeb.Components.WorkflowControls
+  alias TemporalCookbookUi.Temporal.Client
+  alias TemporalCookbookUi.Temporal.Workflow
+
   # Construct
   def mount(%{"pattern_id" => pattern_id}, _session, socket) do
     pattern = get_pattern_by_id(pattern_id)
     {:ok, assign(socket, pattern: pattern)}
   end
 
-  # Reducers
-  def handle_event("start_workflow", _params, socket) do
-    pattern_id = socket.assigns.pattern.id
-    # Generate mock workflow ID for Feature 001
-    workflow_id = "mock-wf-#{:rand.uniform(9999)}"
+  # ===== REDUCERS =====
+  # Reducers transform state based on events.
+  # They should be thin and delegate to converters for data transformation.
+  def handle_event("start_workflow", params, socket) do
+    # Build workflow request using functional core (Workflow module)
+    workflow_request = Workflow.build_request(socket.assigns.pattern.id, params)
 
-    {:noreply, push_navigate(socket, to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}")}
+    # Execute workflow via boundary layer (side effect)
+    case Client.start_workflow(
+           "litellm_workflow",
+           workflow_request.workflow_id,
+           workflow_request.input
+         ) do
+      {:ok, run_id} ->
+        # Navigate to execution view (converter)
+        {:noreply, navigate_to_execution(socket, workflow_request, run_id)}
+
+      {:error, reason} ->
+        # Show error to user (converter)
+        {:noreply, show_error(socket, reason)}
+    end
   end
 
-  # Convertor
+  # ===== CONVERTERS =====
+  # Converters transform data for presentation or navigation.
+  # They are pure functions (no side effects) that format data.
+
+  defp navigate_to_execution(socket, workflow_request, run_id) do
+    # Navigate to execution view with workflow_id and run_id
+    pattern_id = workflow_request.pattern_id
+    workflow_id = workflow_request.workflow_id
+
+    push_navigate(
+      socket,
+      to: ~p"/patterns/#{pattern_id}/executions/#{workflow_id}?run_id=#{run_id}"
+    )
+  end
+
+  defp show_error(socket, reason) do
+    # Show error to user via flash message and socket assign
+    socket
+    |> put_flash(:error, "Failed to start workflow: #{inspect(reason)}")
+    |> assign(:error, reason)
+  end
+
+  # ===== RENDER (Final Converter) =====
+  # The render function is the final converter that formats all data for display.
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -35,18 +76,22 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
         <% end %>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-6 mt-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Pattern Details</h2>
-        <p class="text-gray-600">This is a placeholder for pattern-specific content.</p>
-
-        <div class="mt-6">
-          <button
-            phx-click="start_workflow"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Start Workflow
-          </button>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- Left Panel: Pattern Details -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Pattern Details</h2>
+          <p class="text-gray-600">This is a placeholder for pattern-specific content.</p>
         </div>
+
+    <!-- Right Panel: Workflow Controls -->
+        <%= if @pattern.id == "1" do %>
+          <.live_component module={WorkflowControls} id="workflow-controls" />
+        <% else %>
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Workflow Controls</h2>
+            <p class="text-gray-600">Workflow controls for this pattern coming soon.</p>
+          </div>
+        <% end %>
       </div>
     </div>
     """

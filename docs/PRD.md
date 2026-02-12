@@ -175,14 +175,14 @@ This educational tool bridges the gap between AI Cookbook documentation and prod
 - **Tailwind CSS**: Utility-first styling for responsive, modern UI design
 
 #### Backend Workers
-- **Go Workers**: Temporal workers implementing Cookbook examples from Go SDK
-- **Python Workers**: Temporal workers implementing Cookbook examples from Python SDK
+- **Python Workers**: Single shared worker process registering all 7 cookbook workflows (Temporal-standard pattern - see ADR 001)
+- **Go Workers**: (Future) Temporal workers implementing Cookbook examples from Go SDK
 - **Temporal SDK Clients**: Elixir/Phoenix integration with Temporal gRPC API for workflow control
 
 #### Infrastructure
 - **Temporal Dev Server**: Local Temporal server for workflow orchestration
 - **Phoenix Server**: Web server hosting LiveView application
-- **Worker Processes**: Separate worker processes for Go and Python examples
+- **Worker Process**: Single Python worker process (workers are infrastructure, not app-controlled - see ADR 001)
 
 ### System Architecture
 
@@ -194,11 +194,11 @@ This educational tool bridges the gap between AI Cookbook documentation and prod
 #### Backend Layer
 - **Phoenix Controllers**: API endpoints for workflow launch, signals, queries
 - **Temporal Client**: Elixir Temporal SDK client for workflow operations
-- **Worker Manager**: Process supervision for Go and Python worker pools
+- **Worker Status Monitor**: Health check mechanism for worker availability (workers are infrastructure, not managed by Phoenix - see ADR 001)
 
 #### Workflow Layer
-- **Go Workers**: Compiled Go binaries running Temporal workers with Cookbook workflow implementations
-- **Python Workers**: Python processes running Temporal workers with Cookbook workflow implementations
+- **Python Worker**: Single Python process registering all 7 cookbook workflows (shared worker pattern - see ADR 001)
+- **Go Workers**: (Future) Compiled Go binaries running Temporal workers with Cookbook workflow implementations
 - **Temporal Server**: Local Temporal Dev Server handling workflow orchestration
 
 ### Technical Constraints
@@ -222,7 +222,7 @@ This educational tool bridges the gap between AI Cookbook documentation and prod
 
 #### Temporal Connection Errors
 - **Server Unavailable**: Display clear error message if Temporal Dev Server not running, with setup instructions
-- **Worker Not Running**: Detect if required worker (Go/Python) not available, provide guidance to start worker
+- **Worker Not Running**: Detect if worker not available, provide guidance to start worker manually (workers are infrastructure - see ADR 001)
 - **Network Timeout**: Handle gRPC timeouts gracefully, allow user to retry operation
 
 #### Error Recovery UX
@@ -334,15 +334,15 @@ Home (Pattern Catalog)
   - Learning Timeline: Week 1-2 of development
   - Practical Application: All workflow control operations (launch, signal, query, terminate)
 
-- **Worker Process Management**: Supervise and manage Go and Python worker processes from Elixir application
-  - Success Criteria: Workers auto-restart on failure, health checks confirm worker availability
-  - Evidence: OTP supervision tree managing worker processes
-  - Learning Timeline: Week 2-3 of development
-  - Practical Application: Reliable worker execution for all cookbook examples
+- **Worker Process Management**: Monitor worker health and understand worker architecture (workers are infrastructure, not app-controlled - see ADR 001)
+  - Success Criteria: Health checks confirm worker availability, UI shows worker status, manual worker control documented
+  - Evidence: Worker status monitoring, health check mechanism, clear documentation
+  - Learning Timeline: Week 2-3 of development (Feature 2)
+  - Practical Application: Understanding production-realistic Temporal worker patterns
 
 ### Learning Progress Integration
 - **Learning Reviews**: Scheduled every 2 weeks alongside sprint reviews
-- **Knowledge Capture**: Document insights in `docs/decisions/` (e.g., "Why LiveView for visualization", "Go vs Python worker architecture")
+- **Knowledge Capture**: Document insights in `docs/decisions/` (e.g., "Why LiveView for visualization", "Shared worker architecture" - see ADR 001)
 - **Skill Application**: Each learning goal must be applied in actual project features (e.g., LiveView components used for all visualizations)
 - **Progress Metrics**: Track learning completion alongside feature development metrics (e.g., "Mastered LiveView components: 5/5")
 
@@ -396,7 +396,7 @@ Home (Pattern Catalog)
 
 #### MVP Launch Criteria
 - [ ] At least 8 core workflow patterns implemented and visualizable
-- [ ] Both Python and Go workers operational for all patterns
+- [ ] Python worker operational (single shared worker registering all patterns - see ADR 001)
 - [ ] Real-time workflow execution visualization working reliably
 - [ ] Users can launch workflows, send signals, and inject failures through UI
 - [ ] Comprehensive README with setup instructions and architecture overview
@@ -404,7 +404,7 @@ Home (Pattern Catalog)
 #### Technical Foundation Criteria
 - [ ] Phoenix LiveView application running stably with WebSocket connections
 - [ ] Temporal client integration functional (start workflow, signal, query, get history)
-- [ ] Worker supervision and health monitoring implemented
+- [ ] Worker health monitoring implemented (workers are infrastructure, not supervised by Phoenix - see ADR 001)
 - [ ] Basic test coverage (40%+) with passing CI pipeline
 - [ ] Error handling for common failure scenarios (server down, worker unavailable, timeout)
 
@@ -430,7 +430,7 @@ Home (Pattern Catalog)
 - [ ] Technology stack research (Phoenix LiveView, Temporal Elixir client options)
 - [ ] Development environment setup (Elixir, Phoenix, Temporal Dev Server, Go, Python)
 - [ ] GitHub repository and workflow configuration
-- [ ] Initial architecture decisions documented (worker supervision, visualization approach)
+- [ ] Initial architecture decisions documented (shared worker architecture - ADR 001, visualization approach)
 
 **Exit Criteria**:
 - PRD approved and baselined
@@ -445,7 +445,7 @@ Home (Pattern Catalog)
 - [ ] Temporal client integration (Elixir wrapper for Temporal gRPC)
 - [ ] First 3 workflow patterns implemented (Cron, Signal, Retry)
 - [ ] Basic timeline visualization (Mermaid.js integration)
-- [ ] Worker supervision and management
+- [ ] Worker health monitoring (workers are infrastructure - see ADR 001)
 - [ ] Basic testing framework establishment
 
 **Exit Criteria**:
@@ -475,7 +475,7 @@ Home (Pattern Catalog)
 **Duration**: 2-3 weeks
 **Key Activities**:
 - [ ] Security review (input sanitization, XSS prevention, Temporal access control)
-- [ ] Reliability improvements (worker restart logic, connection retry, graceful shutdown)
+- [ ] Reliability improvements (connection retry, graceful shutdown, worker health monitoring)
 - [ ] Monitoring and observability (structured logging, health checks, metrics)
 - [ ] Docker Compose deployment setup
 - [ ] User acceptance testing with beta users (Temporal community developers)
@@ -521,7 +521,7 @@ Start with simplest patterns to validate architecture, then add complexity. Focu
    - Second pattern: Signal Workflow (introduces user interaction)
 
 3. **Week 5-6: Multi-Language & Testing**
-   - Go and Python worker supervision
+   - Worker health monitoring (shared worker architecture - see ADR 001)
    - Language selector UI
    - Third pattern: Retry Workflow (demonstrates error handling)
    - Basic test suite (unit + integration)
@@ -529,11 +529,11 @@ Start with simplest patterns to validate architecture, then add complexity. Focu
 #### Technical Focus
 - Phoenix LiveView real-time capabilities
 - Temporal gRPC client integration from Elixir
-- Worker process supervision (OTP)
+- Worker health monitoring (workers are infrastructure - see ADR 001)
 
 #### Success Criteria
 - 3 patterns working end-to-end with real-time visualization
-- Both Go and Python workers operational
+- Python worker operational (shared worker pattern - see ADR 001)
 - Users can interact with workflows (send signals)
 - Basic tests passing
 
@@ -590,13 +590,13 @@ Start with simplest patterns to validate architecture, then add complexity. Focu
   - Mitigation: Use gRPC client directly, contribute missing features to Elixir SDK community project
 - **LiveView Performance**: Real-time updates for long workflow histories may cause performance issues
   - Mitigation: Implement event pagination, lazy loading, and virtual scrolling for large histories
-- **Worker Complexity**: Managing Go/Python worker processes from Elixir may be fragile
-  - Mitigation: Use robust OTP supervision, provide clear worker health status in UI, document worker setup
+- **Worker Complexity**: Managing worker processes from Elixir may be fragile
+  - Mitigation: **Architecture Decision**: Workers are infrastructure, not app-controlled (ADR 001). Primary approach: Manual terminal control. Optional OTP supervision for convenience (Feature 5). Provide clear worker health status in UI, document worker setup.
 
 #### Technical Spikes (If Needed)
 - **Temporal gRPC Client**: 2-day spike to evaluate Elixir Temporal client libraries (tortoise, temporalio/sdk-elixir)
 - **Mermaid.js Limitations**: 1-day spike to validate Mermaid.js can handle complex workflow timelines, consider alternatives (D3.js)
-- **Worker Supervision**: 1-day spike to design OTP supervision tree for external worker processes
+- **Worker Architecture**: Decision made - shared worker pattern (ADR 001). Workers are infrastructure, not supervised by Phoenix. Optional OTP supervision for convenience.
 
 ### Definition of Done (Each Phase)
 - [ ] All planned features implemented and manually tested
@@ -621,12 +621,12 @@ Transform Temporal.io learning from static documentation to interactive, visual 
 
 ### Next Steps
 1. **Environment Setup**: Install Elixir, Phoenix, Temporal Dev Server, configure development environment
-2. **Architecture Design**: Document detailed architecture decisions (client integration, worker supervision, visualization approach)
+2. **Architecture Design**: Document detailed architecture decisions (shared worker architecture - ADR 001, client integration, visualization approach)
 3. **First Pattern Implementation**: Build end-to-end flow for Cron Workflow pattern (simplest pattern to validate architecture)
 4. **Iteration & Feedback**: Gather feedback from Temporal community, iterate on UX and technical approach
 
 ### Risk Mitigation
 - Start with simplest patterns to validate architecture before adding complexity
-- Use technical spikes to de-risk key integrations (Temporal client, worker supervision)
+- Use technical spikes to de-risk key integrations (Temporal client). Worker architecture decided (ADR 001).
 - Engage Temporal community early for feedback on approach and value proposition
 - Prioritize incremental delivery to get early validation of learning value

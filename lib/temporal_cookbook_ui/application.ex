@@ -9,7 +9,8 @@ defmodule TemporalCookbookUi.Application do
   def start(_type, _args) do
     children = [
       TemporalCookbookUiWeb.Telemetry,
-      {DNSCluster, query: Application.get_env(:temporal_cookbook_ui, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:temporal_cookbook_ui, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: TemporalCookbookUi.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: TemporalCookbookUi.Finch},

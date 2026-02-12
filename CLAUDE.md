@@ -23,22 +23,36 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 
 ## Current Development Plan
 **Plan Location**: `docs/PLAN.md`
-**Current Phase**: MVP Development (Feature 1 Complete)
+**Current Phase**: MVP Development (Feature 1 Complete, Feature 2 In Progress - 60%)
 **Completed Features**: Feature 001 ✅
-**Next Feature**: Feature 002 - LiteLLM Pattern
+**Current Feature**: Feature 002 - LiteLLM Pattern 🔄
 
 ## Current Session Focus
-**Session 004**: Feature 001 Completion
-**Date**: 2025-11-24
-**Branch**: `feature/1-ui-mockup-phoenix-foundation`
-**Status**: ✅ COMPLETE
+**Feature 002**: LiteLLM Pattern Implementation
+**Date**: 2025-11-25
+**Branch**: `feature/2-litellm-pattern`
+**Status**: 🔄 IN PROGRESS (60% - Core Implementation Complete)
+
+**Session 006 Summary**: Updated Feature 2 documentation to include Temporal Server and multi-worker status monitoring requirements. Implementation deferred for better architecture. See [session notes](docs/sessions/session-006-feature-002-documentation-updates.md) for details.
 
 **Accomplishments**:
-- ✅ Three LiveView modules created with functional navigation
-- ✅ "Start Workflow" button generates mock workflow ID
-- ✅ All documentation updated (PLAN.md, PRD, GitHub Issue #1)
+- ✅ Python worker implemented and running (registers all 7 workflows)
+- ✅ LiteLLM workflow and activity fully implemented
+- ✅ UI components functional (WorkflowControls, ExecutionViewLive)
+- ✅ Temporal client integration (CLI bridge) working
+- ✅ Ollama support configured and tested with gemma3:latest
+- ✅ Real-time workflow status polling and result display
+- ✅ Feature 2 PRD updated with infrastructure status requirements
+- 🔄 Testing with all providers (Ollama ✅, others pending)
+- ⏳ Infrastructure status component (documented, implementation deferred)
 
-**[Detailed Session Notes](docs/sessions/session-004-feature-001-completion.md)**
+**Key Files**:
+- `python/workers/main.py` - Worker main script
+- `python/workflows/litellm_workflow.py` - LiteLLM workflow
+- `python/activities/litellm_completion.py` - LiteLLM activity
+- `lib/temporal_cookbook_ui_web/components/workflow_controls.ex` - UI input controls
+- `lib/temporal_cookbook_ui_web/live/execution_view_live.ex` - Execution visualization
+- `lib/temporal_cookbook_ui/temporal/client.ex` - Temporal client wrapper
 
 ---
 
@@ -79,8 +93,9 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 - **Format Code**: `mix format`
 - **Compile Assets**: `mix assets.deploy` (production)
 - **Start Temporal Dev Server**: `temporal server start-dev` (TBD - not yet configured)
+- **Install Python Dependencies**: `cd python && uv sync` (using uv for Python environment management)
+- **Run Python Workers**: `cd python && uv run python worker/main.py` (using uv to run in managed environment)
 - **Run Go Workers**: TBD (to be determined during Feature 3-7)
-- **Run Python Workers**: TBD (to be determined during Feature 3-7)
 
 **App Name**: `temporal_cookbook_ui`
 **Module Names**: `TemporalCookbookUi` (core), `TemporalCookbookUiWeb` (web)
