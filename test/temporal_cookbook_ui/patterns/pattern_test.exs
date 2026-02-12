@@ -8,7 +8,7 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       patterns = Pattern.list_all()
 
       assert is_list(patterns)
-      assert length(patterns) == 3
+      assert length(patterns) == 6
     end
 
     test "returns patterns with correct structure" do
@@ -16,10 +16,14 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
 
       for pattern <- patterns do
         assert %Pattern{} = pattern
-        assert pattern.id != nil
-        assert is_binary(pattern.name) or is_integer(pattern.id)
+        assert is_binary(pattern.id)
+        assert is_binary(pattern.name)
         assert is_binary(pattern.description)
-        assert pattern.complexity in ["Easy", "Medium", "Hard", nil]
+        assert pattern.complexity in ["Easy", "Medium", "Hard"]
+        assert is_list(pattern.tags)
+        assert is_binary(pattern.workflow_type)
+        assert pattern.status in [:available, :coming_soon]
+        assert is_list(pattern.use_cases)
       end
     end
 
@@ -30,72 +34,94 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       assert patterns1 == patterns2
     end
 
-    test "includes expected patterns" do
+    test "includes all 6 expected patterns" do
       patterns = Pattern.list_all()
       pattern_ids = Enum.map(patterns, & &1.id)
 
-      assert 1 in pattern_ids
-      assert 2 in pattern_ids
-      assert 3 in pattern_ids
+      assert "litellm" in pattern_ids
+      assert "tool-calling" in pattern_ids
+      assert "structured-outputs" in pattern_ids
+      assert "retry-policy" in pattern_ids
+      assert "durable-agent" in pattern_ids
+      assert "deep-research" in pattern_ids
+    end
+
+    test "litellm is the only available pattern" do
+      patterns = Pattern.list_all()
+      available = Enum.filter(patterns, &(&1.status == :available))
+
+      assert length(available) == 1
+      assert hd(available).id == "litellm"
     end
   end
 
   describe "get_by_id/1" do
-    test "returns pattern for valid integer ID" do
-      pattern = Pattern.get_by_id(1)
+    test "returns litellm pattern" do
+      pattern = Pattern.get_by_id("litellm")
 
       assert %Pattern{} = pattern
-      assert pattern.id == 1
-      assert pattern.name == "Hello World Litellm"
-
-      assert pattern.description ==
-               "Use Litellm to provide AI capabilities within your Temporal workflows."
-
+      assert pattern.id == "litellm"
+      assert pattern.name == "LiteLLM Completion"
       assert pattern.complexity == "Easy"
+      assert pattern.status == :available
+      assert pattern.workflow_type == "litellm_workflow"
+      assert is_list(pattern.tags)
+      assert is_list(pattern.use_cases)
+      assert length(pattern.use_cases) > 0
     end
 
-    test "returns pattern for valid integer ID (2)" do
-      pattern = Pattern.get_by_id(2)
+    test "returns tool-calling pattern" do
+      pattern = Pattern.get_by_id("tool-calling")
 
       assert %Pattern{} = pattern
-      assert pattern.id == 2
-      assert pattern.name == "Pattern B"
+      assert pattern.id == "tool-calling"
+      assert pattern.name == "Tool Calling Agent"
       assert pattern.complexity == "Medium"
+      assert pattern.status == :coming_soon
+      assert pattern.workflow_type == "tool_calling_workflow"
     end
 
-    test "returns pattern for valid integer ID (3)" do
-      pattern = Pattern.get_by_id(3)
+    test "returns structured-outputs pattern" do
+      pattern = Pattern.get_by_id("structured-outputs")
 
       assert %Pattern{} = pattern
-      assert pattern.id == 3
-      assert pattern.name == "Pattern C"
+      assert pattern.id == "structured-outputs"
+      assert pattern.complexity == "Medium"
+      assert pattern.status == :coming_soon
+    end
+
+    test "returns retry-policy pattern" do
+      pattern = Pattern.get_by_id("retry-policy")
+
+      assert %Pattern{} = pattern
+      assert pattern.id == "retry-policy"
+      assert pattern.complexity == "Easy"
+      assert pattern.status == :coming_soon
+    end
+
+    test "returns durable-agent pattern" do
+      pattern = Pattern.get_by_id("durable-agent")
+
+      assert %Pattern{} = pattern
+      assert pattern.id == "durable-agent"
       assert pattern.complexity == "Hard"
+      assert pattern.status == :coming_soon
     end
 
-    test "returns default pattern for string ID (no string-to-integer conversion)" do
-      # String IDs don't match integer IDs in the current implementation
-      pattern = Pattern.get_by_id("1")
+    test "returns deep-research pattern" do
+      pattern = Pattern.get_by_id("deep-research")
 
       assert %Pattern{} = pattern
-      assert pattern.id == "1"
-      assert pattern.name == "Unknown Pattern"
+      assert pattern.id == "deep-research"
+      assert pattern.complexity == "Hard"
+      assert pattern.status == :coming_soon
     end
 
-    test "returns default pattern for invalid integer ID" do
-      pattern = Pattern.get_by_id(999)
+    test "returns default pattern for unknown string ID" do
+      pattern = Pattern.get_by_id("unknown-id")
 
       assert %Pattern{} = pattern
-      assert pattern.id == 999
-      assert pattern.name == "Unknown Pattern"
-      assert pattern.description == "Pattern not found"
-      assert pattern.complexity == "Unknown"
-    end
-
-    test "returns default pattern for invalid string ID" do
-      pattern = Pattern.get_by_id("invalid")
-
-      assert %Pattern{} = pattern
-      assert pattern.id == "invalid"
+      assert pattern.id == "unknown-id"
       assert pattern.name == "Unknown Pattern"
       assert pattern.description == "Pattern not found"
       assert pattern.complexity == "Unknown"
@@ -109,19 +135,11 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       assert pattern.name == "Unknown Pattern"
     end
 
-    test "handles negative IDs" do
-      pattern = Pattern.get_by_id(-1)
+    test "returns default pattern for integer ID (IDs are strings)" do
+      pattern = Pattern.get_by_id(1)
 
       assert %Pattern{} = pattern
-      assert pattern.id == -1
-      assert pattern.name == "Unknown Pattern"
-    end
-
-    test "handles zero ID" do
-      pattern = Pattern.get_by_id(0)
-
-      assert %Pattern{} = pattern
-      assert pattern.id == 0
+      assert pattern.id == 1
       assert pattern.name == "Unknown Pattern"
     end
   end
@@ -136,18 +154,19 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
         assert retrieved.name == pattern.name
         assert retrieved.description == pattern.description
         assert retrieved.complexity == pattern.complexity
+        assert retrieved.tags == pattern.tags
+        assert retrieved.workflow_type == pattern.workflow_type
+        assert retrieved.status == pattern.status
+        assert retrieved.use_cases == pattern.use_cases
       end
     end
 
-    test "get_by_id returns same pattern instance as list_all" do
+    test "get_by_id returns same pattern as list_all for litellm" do
       all_patterns = Pattern.list_all()
-      pattern_from_list = Enum.find(all_patterns, &(&1.id == 1))
-      pattern_by_id = Pattern.get_by_id(1)
+      pattern_from_list = Enum.find(all_patterns, &(&1.id == "litellm"))
+      pattern_by_id = Pattern.get_by_id("litellm")
 
-      assert pattern_from_list.id == pattern_by_id.id
-      assert pattern_from_list.name == pattern_by_id.name
-      assert pattern_from_list.description == pattern_by_id.description
-      assert pattern_from_list.complexity == pattern_by_id.complexity
+      assert pattern_from_list == pattern_by_id
     end
   end
 
@@ -157,13 +176,21 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
         id: "test",
         name: "Test Pattern",
         description: "Test description",
-        complexity: "Easy"
+        complexity: "Easy",
+        tags: ["Tag1"],
+        workflow_type: "test_workflow",
+        status: :available,
+        use_cases: ["Use case 1"]
       }
 
       assert pattern.id == "test"
       assert pattern.name == "Test Pattern"
       assert pattern.description == "Test description"
       assert pattern.complexity == "Easy"
+      assert pattern.tags == ["Tag1"]
+      assert pattern.workflow_type == "test_workflow"
+      assert pattern.status == :available
+      assert pattern.use_cases == ["Use case 1"]
     end
 
     test "Pattern struct allows nil values" do
