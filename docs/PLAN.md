@@ -1,7 +1,7 @@
 # Development Plan - Temporal AI Cookbook UI
 
-**Last Updated**: 2025-11-25 (Feature 2 in progress - core implementation complete)
-**Current Phase**: MVP Development (Feature 1 Complete, Feature 2 In Progress - 60%)
+**Last Updated**: 2026-02-12 (Feature 3 complete - catalog polished with 6 real patterns)
+**Current Phase**: MVP Development (Features 1-3 Complete, Feature 4 Next)
 **Project Focus**: Interactive playground for Temporal AI Cookbook patterns
 **Timeline**: 6-8 weeks to MVP
 
@@ -49,7 +49,7 @@ Create low-fidelity wireframes and Phoenix LiveView foundation.
 
 ---
 
-### Feature 2: LiteLLM Pattern - Complete Vertical Slice 🔄 IN PROGRESS (60%)
+### Feature 2: LiteLLM Pattern - Complete Vertical Slice ✅ COMPLETE
 **GitHub Issue**: #2 | **Priority**: High | **Estimate**: 5 days
 **PRD**: `docs/features/feature-002-litellm-pattern.md`
 **Related ADR**: `docs/decisions/001-shared-worker-architecture.md`
@@ -80,19 +80,21 @@ First complete pattern implementation - LiteLLM with multi-provider support.
 
 ---
 
-### Feature 3: Pattern Catalog & Navigation
+### Feature 3: Pattern Catalog Polish ✅ COMPLETE
 **GitHub Issue**: #3 | **Priority**: High | **Estimate**: 2 days
-**PRD**: `docs/features/feature-003-pattern-catalog.md`
 
-Homepage displaying Temporal AI Cookbook pattern catalog.
+Populate catalog with all 6 real Temporal AI Cookbook patterns and polish detail pages.
 
 **Key Deliverables**:
-- Pattern catalog page with grid layout
-- 7 AI Cookbook pattern cards: Hello World, LiteLLM, Structured Outputs, Retry Policy, Tool Calling Agent, Durable Agent, Deep Research
-- Pattern metadata: description, tags, complexity level
-- Navigation to pattern detail pages
+- ✅ 6 real pattern entries with meaningful descriptions, tags, complexity, use cases, workflow_type
+- ✅ Pattern struct extended with: `:tags`, `:workflow_type`, `:status`, `:use_cases`
+- ✅ `PatternDetailLive` uses `Pattern.get_by_id/1` (removed duplicate local data)
+- ✅ Detail page left panel renders tags as badges and use-case bullets
+- ✅ Non-LiteLLM patterns show "coming soon" in workflow controls area
+- ✅ `start_workflow` uses `@pattern.workflow_type` instead of hardcoded string
+- ✅ All tests updated and passing
 
-**Exit Criteria**: Catalog displays all patterns, clicking card navigates to detail, LiteLLM pattern fully integrated
+**Exit Criteria**: Catalog displays all 6 patterns, detail page shows real content, LiteLLM functional, others show coming soon
 
 ---
 
