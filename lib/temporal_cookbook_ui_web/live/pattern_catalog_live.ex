@@ -22,7 +22,12 @@ defmodule TemporalCookbookUiWeb.PatternCatalogLive do
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <%= for pattern <- @patterns do %>
           <.link navigate={~p"/patterns/#{pattern.id}"} class="block">
-            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div class="relative bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+              <%= if pattern.status == :coming_soon do %>
+                <span class="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium text-amber-700 bg-amber-100 rounded-full">
+                  Coming Soon
+                </span>
+              <% end %>
               <h2 class="text-xl font-semibold text-gray-900">{pattern.name}</h2>
               <p class="mt-2 text-gray-600">{pattern.description}</p>
               <%= if Map.has_key?(pattern, :complexity) do %>

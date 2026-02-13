@@ -46,12 +46,14 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       assert "deep-research" in pattern_ids
     end
 
-    test "litellm is the only available pattern" do
+    test "litellm and tool-calling are the available patterns" do
       patterns = Pattern.list_all()
       available = Enum.filter(patterns, &(&1.status == :available))
+      available_ids = Enum.map(available, & &1.id)
 
-      assert length(available) == 1
-      assert hd(available).id == "litellm"
+      assert length(available) == 2
+      assert "litellm" in available_ids
+      assert "tool-calling" in available_ids
     end
   end
 
@@ -77,7 +79,7 @@ defmodule TemporalCookbookUi.Patterns.PatternTest do
       assert pattern.id == "tool-calling"
       assert pattern.name == "Tool Calling Agent"
       assert pattern.complexity == "Medium"
-      assert pattern.status == :coming_soon
+      assert pattern.status == :available
       assert pattern.workflow_type == "tool_calling_workflow"
     end
 
