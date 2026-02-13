@@ -3,6 +3,12 @@
 ## Project Overview
 Interactive web-based playground for exploring Temporal.io Cookbook examples. Built with Phoenix LiveView for real-time workflow visualization, enabling developers to learn Temporal patterns through hands-on experimentation without writing code.
 
+## General Rules
+
+- **Only change what was explicitly requested.** Do not refactor, rename, add docstrings,
+  or "improve" code you didn't need to touch. If you notice something worth fixing, say so —
+  don't silently change it.
+
 **Original PRD**: `/Users/joeszodfridt/src/brand/project-ideas/PRD_Temporal_Cookbook_UI.md`
 
 ## Project Requirements & Specification
