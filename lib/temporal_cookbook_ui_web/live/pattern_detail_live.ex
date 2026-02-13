@@ -73,6 +73,16 @@ defmodule TemporalCookbookUiWeb.PatternDetailLive do
         <span class="mt-4 inline-block px-3 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">
           {@pattern.complexity}
         </span>
+
+        <%= if @pattern.status == :coming_soon do %>
+          <div class="mt-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <span class="text-amber-500 text-lg">🚧</span>
+            <div>
+              <p class="text-sm font-medium text-amber-800">Coming Soon</p>
+              <p class="text-sm text-amber-700">This pattern is under active development. Check back soon for a working example.</p>
+            </div>
+          </div>
+        <% end %>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">

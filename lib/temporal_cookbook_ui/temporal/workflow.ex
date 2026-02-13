@@ -45,7 +45,7 @@ defmodule TemporalCookbookUi.Temporal.Workflow do
       iex> request = TemporalCookbookUi.Temporal.Workflow.build_request("1", params)
       iex> request.pattern_id
       "1"
-      iex> String.starts_with?(request.workflow_id, "litellm-")
+      iex> String.starts_with?(request.workflow_id, "1-")
       true
       iex> request.input["model"]
       "ollama/gemma3:latest"
@@ -75,7 +75,7 @@ defmodule TemporalCookbookUi.Temporal.Workflow do
 
     %{
       pattern_id: pattern_id,
-      workflow_id: generate_id(),
+      workflow_id: generate_id(pattern_id),
       input: workflow_input
     }
   end

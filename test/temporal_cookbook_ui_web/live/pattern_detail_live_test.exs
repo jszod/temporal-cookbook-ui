@@ -32,10 +32,10 @@ defmodule TemporalCookbookUiWeb.PatternDetailLiveTest do
       assert render(view) =~ "Workflow Controls"
     end
 
-    test "shows coming soon for tool-calling pattern", %{conn: conn} do
+    test "shows workflow controls for tool-calling pattern", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/patterns/tool-calling")
 
-      assert render(view) =~ "Workflow controls for this pattern coming soon"
+      assert render(view) =~ "Workflow Controls"
     end
 
     test "shows tags for litellm pattern", %{conn: conn} do
@@ -52,9 +52,8 @@ defmodule TemporalCookbookUiWeb.PatternDetailLiveTest do
       assert render(view) =~ "Compare responses across LLM providers"
     end
 
-    test "shows coming soon for all non-litellm patterns", %{conn: conn} do
+    test "shows coming soon for coming_soon patterns", %{conn: conn} do
       coming_soon_ids = [
-        "tool-calling",
         "structured-outputs",
         "retry-policy",
         "durable-agent",

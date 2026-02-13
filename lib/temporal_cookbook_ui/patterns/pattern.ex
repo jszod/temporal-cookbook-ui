@@ -43,7 +43,7 @@ defmodule TemporalCookbookUi.Patterns.Pattern do
         complexity: "Medium",
         tags: ["Agent", "Tool Use", "LLM", "Activity"],
         workflow_type: "tool_calling_workflow",
-        status: :coming_soon,
+        status: :available,
         use_cases: [
           "Build LLM agents that call real APIs",
           "Automate multi-step research tasks",

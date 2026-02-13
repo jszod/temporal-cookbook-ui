@@ -28,56 +28,40 @@ Interactive web-based playground for exploring Temporal.io Cookbook examples. Bu
 **Current Feature**: Feature 002 - LiteLLM Pattern 🔄
 
 ## Current Session Focus
-**Feature 002**: LiteLLM Pattern Implementation
-**Date**: 2025-11-25
-**Branch**: `feature/2-litellm-pattern`
-**Status**: 🔄 IN PROGRESS (60% - Core Implementation Complete)
+**Session 007**: Stub Workflows Cleanup
+**Date**: 2026-02-13
+**Branch**: `feature/stub-workflows-cleanup`
+**Status**: ✅ Complete
 
-**Session 006 Summary**: Updated Feature 2 documentation to include Temporal Server and multi-worker status monitoring requirements. Implementation deferred for better architecture. See [session notes](docs/sessions/session-006-feature-002-documentation-updates.md) for details.
+**Session 007 Summary**: Wired tool-calling stub to UI, fixed workflow ID prefixing, added Coming Soon indicators to catalog and detail pages. See [session notes](docs/sessions/session-007-stub-workflows-cleanup.md) for details.
 
 **Accomplishments**:
-- ✅ Python worker implemented and running (registers all 7 workflows)
-- ✅ LiteLLM workflow and activity fully implemented
-- ✅ UI components functional (WorkflowControls, ExecutionViewLive)
-- ✅ Temporal client integration (CLI bridge) working
-- ✅ Ollama support configured and tested with gemma3:latest
-- ✅ Real-time workflow status polling and result display
-- ✅ Feature 2 PRD updated with infrastructure status requirements
-- 🔄 Testing with all providers (Ollama ✅, others pending)
-- ⏳ Infrastructure status component (documented, implementation deferred)
+- ✅ `tool-calling` pattern status flipped to `:available` — WorkflowControls now renders
+- ✅ Workflow IDs now prefixed with `pattern_id` (e.g. `tool-calling-123456-4321`)
+- ✅ Coming Soon amber badge added to catalog page cards
+- ✅ Coming Soon amber banner added to pattern detail page
+- ✅ Debugged worker registration bug (worker must be restarted after `.py` file changes)
+- ✅ All 133 tests + 23 doctests passing
 
-**Key Files**:
-- `python/workers/main.py` - Worker main script
-- `python/workflows/litellm_workflow.py` - LiteLLM workflow
-- `python/activities/litellm_completion.py` - LiteLLM activity
-- `lib/temporal_cookbook_ui_web/components/workflow_controls.ex` - UI input controls
-- `lib/temporal_cookbook_ui_web/live/execution_view_live.ex` - Execution visualization
-- `lib/temporal_cookbook_ui/temporal/client.ex` - Temporal client wrapper
+**Key Lesson**: Python workers load workflow definitions at startup — any `.py` change requires a worker restart.
 
 ---
 
 ### Previous Sessions
 
-**Session 003** (2025-11-21):
-- ✅ Phoenix Project initialized
-- ✅ Config files cleaned, server verified running
+**Session 006** (2025-11-25): Feature 2 documentation updates - [Session Notes](docs/sessions/session-006-feature-002-documentation-updates.md)
 
-**Session 002** (2025-11-18):
-- ✅ Project pivoted to Temporal AI Cookbook
-- ✅ Created `docs/PLAN.md` with 7 MVP features
-- ✅ GitHub Issues #1-#7 created
+**Session 005** (earlier): Workflow investigation - [Session Notes](docs/sessions/session-005-workflow-investigation.md)
 
-**Session 001** (2025-11-15):
-- ✅ Project initialized from claude-code-workflow-template
-- ✅ GitHub repository created
-- ✅ Initial PRD populated
+**Session 004** (earlier): Feature 001 completion - [Session Notes](docs/sessions/session-004-feature-001-completion.md)
+
+**Session 001** (2025-11-15): Initial setup - [Session Notes](docs/sessions/session-001-initial-setup.md)
 
 ---
 
 **Next Session Goals**:
-- Start Feature 002: LiteLLM Pattern
-- Create Feature 002 PRD
-- Research Temporal client integration options
+- Implement real Tool Calling workflow (Feature 003)
+- Consider enabling remaining stubs (structured-outputs, retry-policy, durable-agent, deep-research)
 
 ## Development Environment
 

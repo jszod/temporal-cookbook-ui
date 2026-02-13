@@ -17,7 +17,7 @@ defmodule TemporalCookbookUi.Temporal.WorkflowTest do
 
       assert request.pattern_id == "1"
       assert is_binary(request.workflow_id)
-      assert String.starts_with?(request.workflow_id, "litellm-")
+      assert String.starts_with?(request.workflow_id, "1-")
       assert request.input["model"] == "ollama/gemma3:latest"
       assert request.input["prompt"] == "Hello, world!"
       assert request.input["temperature"] == 0.7
