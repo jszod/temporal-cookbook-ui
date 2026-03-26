@@ -2,7 +2,10 @@
 name = "python"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["temporalio", "litellm"]
+dependencies = [
+    "temporalio",
+    "litellm==1.82.6",
+]
 
 [project.optional-dependencies]
 dev = ["pytest"]
